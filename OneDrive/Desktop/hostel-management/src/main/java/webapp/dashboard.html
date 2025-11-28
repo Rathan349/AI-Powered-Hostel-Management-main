@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hostel Management - Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+        }
+        .nav {
+            background: #343a40;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-left h2 {
+            margin: 0;
+        }
+        .nav-right button {
+            margin-left: 10px;
+            padding: 6px 12px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-right button:hover {
+            opacity: 0.9;
+        }
+        .content {
+            max-width: 1100px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        h3 {
+            margin-top: 0;
+        }
+        form input, form select, form button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        form input, form select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        form button {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        form button:hover {
+            opacity: 0.9;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        th {
+            background: #f1f1f1;
+        }
+        .message {
+            margin-top: 5px;
+            min-height: 18px;
+            font-size: 14px;
+        }
+        .message.success {
+            color: green;
+        }
+        .message.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <div class="nav-left">
+        <h2>Hostel Admin Dashboard</h2>
+    </div>
+    <div class="nav-right">
+        <button onclick="showSection('studentsSection')">Students</button>
+        <button onclick="showSection('roomsSection')">Rooms</button>
+        <button onclick="showSection('allocationSection')">Allocation</button>
+    </div>
+</div>
+
+<div class="content">
+
+    <!-- STUDENTS SECTION -->
+    <div id="studentsSection" class="section active">
+        <h3>Student Management</h3>
+
+        <h4>Add Student</h4>
+        <form id="studentForm">
+            <input type="text" id="regNo" placeholder="Registration Number" required>
+            <input type="text" id="studentName" placeholder="Student Name" required>
+            <input type="text" id="department" placeholder="Department">
+            <input type="number" id="year" placeholder="Year">
+            <input type="text" id="phone" placeholder="Phone">
+            <input type="email" id="email" placeholder="Email">
+            <button type="submit">Add Student</button>
+        </form>
+        <p id="studentMsg" class="message"></p>
+
+        <h4>Student List</h4>
+        <table id="studentsTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Reg No</th>
+                <th>Name</th>
+                <th>Dept</th>
+                <th>Year</th>
+                <th>Phone</th>
+                <th>Email</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- ROOMS SECTION -->
+    <div id="roomsSection" class="section">
+        <h3>Room Management</h3>
+
+        <h4>Add Room</h4>
+        <form id="roomForm">
+            <input type="text" id="blockName" placeholder="Block Name" required>
+            <input type="text" id="roomNo" placeholder="Room Number" required>
+            <input type="number" id="capacity" placeholder="Capacity" required>
+            <button type="submit">Add Room</button>
+        </form>
+        <p id="roomMsg" class="message"></p>
+
+        <h4>Room List</h4>
+        <table id="roomsTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Block</th>
+                <th>Room No</th>
+                <th>Capacity</th>
+                <th>Occupied</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- ALLOCATION SECTION -->
+    <div id="allocationSection" class="section">
+        <h3>Room Allocation</h3>
+
+        <h4>Allocate Room to Student</h4>
+        <form id="allocationForm">
+            <label for="studentSelect">Select Student</label>
+            <select id="studentSelect" required>
+                <option value="">-- Select Student --</option>
+            </select>
+
+            <label for="roomSelect">Select Available Room</label>
+            <select id="roomSelect" required>
+                <option value="">-- Select Room --</option>
+            </select>
+
+            <button type="submit">Allocate Room</button>
+        </form>
+        <p id="allocationMsg" class="message"></p>
+
+        <h4>Allocation List</h4>
+        <table id="allocationsTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Student Name</th>
+                <th>Reg No</th>
+                <th>Block</th>
+                <th>Room No</th>
+                <th>Allocation Date</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+/* ---------- Section switch ---------- */
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+
+    if (id === 'studentsSection') {
+        loadStudents();
+    } else if (id === 'roomsSection') {
+        loadRooms();
+    } else if (id === 'allocationSection') {
+        loadStudentsDropdown();
+        loadAvailableRoomsDropdown();
+        loadAllocations();
+    }
+}
+
+/* ---------- STUDENT FUNCTIONS ---------- */
+document.getElementById('studentForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const formData = new URLSearchParams();
+    formData.append('regNo', document.getElementById('regNo').value);
+    formData.append('name', document.getElementById('studentName').value);
+    formData.append('department', document.getElementById('department').value);
+    formData.append('year', document.getElementById('year').value);
+    formData.append('phone', document.getElementById('phone').value);
+    formData.append('email', document.getElementById('email').value);
+
+    fetch('api/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        const msg = document.getElementById('studentMsg');
+        if (data.status === 'success') {
+            msg.textContent = 'Student added successfully';
+            msg.className = 'message success';
+            document.getElementById('studentForm').reset();
+            loadStudents();
+            loadStudentsDropdown(); // update dropdown for allocation
+        } else {
+            msg.textContent = data.message || 'Error adding student';
+            msg.className = 'message error';
+        }
+    })
+    .catch(err => console.error(err));
+});
+
+function loadStudents() {
+    fetch('api/students')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#studentsTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.id}</td>
+                    <td>${s.regNo}</td>
+                    <td>${s.name}</td>
+                    <td>${s.department || ''}</td>
+                    <td>${s.year || ''}</td>
+                    <td>${s.phone || ''}</td>
+                    <td>${s.email || ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+/* ---------- ROOM FUNCTIONS ---------- */
+document.getElementById('roomForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const formData = new URLSearchParams();
+    formData.append('blockName', document.getElementById('blockName').value);
+    formData.append('roomNo', document.getElementById('roomNo').value);
+    formData.append('capacity', document.getElementById('capacity').value);
+
+    fetch('api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        const msg = document.getElementById('roomMsg');
+        if (data.status === 'success') {
+            msg.textContent = 'Room added successfully';
+            msg.className = 'message success';
+            document.getElementById('roomForm').reset();
+            loadRooms();
+            loadAvailableRoomsDropdown(); // update allocation dropdown
+        } else {
+            msg.textContent = data.message || 'Error adding room';
+            msg.className = 'message error';
+        }
+    })
+    .catch(err => console.error(err));
+});
+
+function loadRooms() {
+    fetch('api/rooms')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#roomsTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${r.id}</td>
+                    <td>${r.blockName}</td>
+                    <td>${r.roomNo}</td>
+                    <td>${r.capacity}</td>
+                    <td>${r.occupied}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+/* ---------- ALLOCATION FUNCTIONS ---------- */
+// dropdowns
+function loadStudentsDropdown() {
+    fetch('api/students')
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '<option value="">-- Select Student --</option>';
+            data.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.regNo} - ${s.name}`;
+                select.appendChild(opt);
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+function loadAvailableRoomsDropdown() {
+    fetch('api/rooms?type=available')
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('roomSelect');
+            select.innerHTML = '<option value="">-- Select Room --</option>';
+            data.forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.textContent = `${r.blockName} - ${r.roomNo} ( ${r.occupied}/${r.capacity} )`;
+                select.appendChild(opt);
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+// allocate
+document.getElementById('allocationForm').addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const studentId = document.getElementById('studentSelect').value;
+    const roomId = document.getElementById('roomSelect').value;
+
+    const formData = new URLSearchParams();
+    formData.append('studentId', studentId);
+    formData.append('roomId', roomId);
+
+    fetch('api/allocations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        const msg = document.getElementById('allocationMsg');
+        if (data.status === 'success') {
+            msg.textContent = 'Room allocated successfully';
+            msg.className = 'message success';
+            loadAllocations();
+            loadAvailableRoomsDropdown(); // room occupancy changed
+        } else {
+            msg.textContent = data.message || 'Allocation failed';
+            msg.className = 'message error';
+        }
+    })
+    .catch(err => console.error(err));
+});
+
+// load allocations table
+function loadAllocations() {
+    fetch('api/allocations')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#allocationsTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${a.id}</td>
+                    <td>${a.studentName || ''}</td>
+                    <td>${a.studentRegNo || ''}</td>
+                    <td>${a.blockName || ''}</td>
+                    <td>${a.roomNo || ''}</td>
+                    <td>${a.allocationDate}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+/* ---------- On initial page load ---------- */
+window.onload = function() {
+    loadStudents();
+    loadRooms();
+    // allocation stuff will be loaded when Allocation tab clicked
+};
+</script>
+</body>
+</html>

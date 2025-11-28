@@ -1,0 +1,200 @@
+/* ================================
+   GLOBAL STYLES
+=================================== */
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+h2, h3, h4 {
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+/* ================================
+   NAVIGATION BAR
+=================================== */
+
+.nav {
+    background: #343a40;
+    color: #fff;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav h2 {
+    margin: 0;
+}
+
+.nav button {
+    background: #007bff;
+    color: white;
+    border: none;
+    margin-left: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.nav button:hover {
+    opacity: 0.9;
+}
+
+/* ================================
+   CONTENT BOX
+=================================== */
+
+.content {
+    max-width: 1100px;
+    margin: 25px auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,.08);
+}
+
+/* ================================
+   SECTION DISPLAY CONTROL
+=================================== */
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+/* ================================
+   FORMS
+=================================== */
+
+form {
+    margin-bottom: 15px;
+    padding: 10px 0;
+}
+
+form input,
+form select {
+    width: 100%;
+    padding: 8px 10px;
+    margin: 5px 0 10px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form button {
+    padding: 10px 16px;
+    background: #28a745;
+    color: white;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+form button:hover {
+    opacity: 0.92;
+}
+
+/* ================================
+   TABLES
+=================================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table th {
+    background: #f1f1f1;
+    font-weight: bold;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+}
+
+table tr:nth-child(even) {
+    background: #fafafa;
+}
+
+/* ================================
+   SUCCESS / ERROR MESSAGES
+=================================== */
+
+.message {
+    font-size: 14px;
+    min-height: 18px;
+    margin-top: 5px;
+}
+
+.message.success {
+    color: green;
+}
+
+.message.error {
+    color: red;
+}
+
+/* ================================
+   LOGIN PAGE (index.html)
+=================================== */
+
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,.1);
+}
+
+.login-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-container label {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.login-container button {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 15px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.login-container button:hover {
+    opacity: 0.9;
+}
+
+#loginMessage {
+    text-align: center;
+    color: red;
+    margin-top: 10px;
+}

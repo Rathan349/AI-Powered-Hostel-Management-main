@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hostel Management - Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 80px auto;
+            background: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #loginMessage {
+            margin-top: 10px;
+            color: red;
+            text-align: center;
+            min-height: 18px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Hostel Management System</h2>
+    <form id="loginForm">
+        <label for="username">Username</label>
+        <input type="text" id="username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+    <p id="loginMessage"></p>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new URLSearchParams();
+    formData.append('username', document.getElementById('username').value);
+    formData.append('password', document.getElementById('password').value);
+
+    fetch('api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = 'dashboard.html';
+        } else {
+            document.getElementById('loginMessage').innerText = data.message || 'Login failed';
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById('loginMessage').innerText = 'Error connecting to server';
+    });
+});
+</script>
+</body>
+</html>
