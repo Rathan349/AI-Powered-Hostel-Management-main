@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages - Inbox</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <style>
+    .message-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .message-tabs a {
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #666;
+      border-bottom: 3px solid transparent;
+    }
+    .message-tabs a.active {
+      color: #2a9d8f;
+      border-bottom-color: #2a9d8f;
+      font-weight: bold;
+    }
+    .message-row {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .message-row:hover {
+      background-color: #f8f9fa;
+    }
+    .message-row.unread {
+      background-color: #e3f2fd;
+      font-weight: bold;
+    }
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .compose-btn {
+      background-color: #2a9d8f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>Student Portal</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_dashboard.profile_page')}}">Profile</a>
+        <a href="{{url_for('t_dashboard.room_page')}}">Room Info</a>
+        <a href="{{url_for('t_dashboard.mess_page')}}">Mess</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}">Complaints</a>
+        <a href="{{url_for('t_message.inbox')}}" class="active">Messages</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container-fluid">
+        <h1 class="mb-3">💬 Messages - Sent</h1>
+        <p class="text-muted">View your sent messages</p>
+
+      <div style="margin-bottom: 20px;">
+        <a href="{{url_for('t_message.compose')}}" class="compose-btn">✉️ Message Admin</a>
+      </div>
+
+      <div class="message-tabs">
+        <a href="{{url_for('t_message.inbox')}}">📥 Inbox</a>
+        <a href="{{url_for('t_message.sent')}}" class="active">📤 Sent</a>
+      </div>
+
+      <section>
+        {% if messages %}
+          {% for msg in messages %}
+          <div class="message-row" 
+               onclick="window.location.href='{{url_for('t_message.view_message', message_id=msg.get('message_id'))}}'">
+            <div class="message-header">
+              <strong>To: Admin</strong>
+              <span style="color: #666; font-size: 0.9em;">{{msg.get('timestamp', 'N/A')[:16]}}</span>
+            </div>
+            <div style="font-weight: bold; margin-bottom: 5px;">{{msg.get('subject')}}</div>
+            <div style="color: #666; font-size: 0.9em;">
+              {{msg.get('message')[:100]}}{% if msg.get('message')|length > 100 %}...{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="text-align: center; padding: 40px; color: #666;">
+            <p>No sent messages</p>
+          </div>
+        {% endif %}
+      </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

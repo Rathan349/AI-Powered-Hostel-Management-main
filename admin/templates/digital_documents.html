@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Documents & QR System</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .qr-dashboard {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #1d3557;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .qr-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      border-left: 5px solid transparent;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .feature-card.student-id {
+      border-left-color: #28a745;
+    }
+
+    .feature-card.visitor {
+      border-left-color: #007bff;
+    }
+
+    .feature-card.leave-pass {
+      border-left-color: #ffc107;
+    }
+
+    .feature-card.scanner {
+      border-left-color: #dc3545;
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .student-id .feature-icon {
+      background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .visitor .feature-icon {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+
+    .leave-pass .feature-icon {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+    }
+
+    .scanner .feature-icon {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    .feature-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #1d3557;
+      margin: 0;
+    }
+
+    .feature-description {
+      color: #666;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .feature-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      color: #212529;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .recent-activity {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .activity-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+
+    .activity-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .activity-qr {
+      background: #28a745;
+    }
+
+    .activity-visitor {
+      background: #007bff;
+    }
+
+    .activity-leave {
+      background: #ffc107;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-title {
+      font-weight: 600;
+      color: #1d3557;
+      margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .qr-features {
+        grid-template-columns: 1fr;
+      }
+      
+      .feature-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('qr.digital_documents')}}" class="active">📱 Digital Documents</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <div class="qr-dashboard">
+        <h1 class="mb-3">📱 Digital Documents & QR System</h1>
+        <p class="mb-0">Manage digital IDs, visitor passes, and leave permissions with secure QR codes</p>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-id-card"></i>
+          </div>
+          <div class="stat-number">{{total_students}}</div>
+          <div class="stat-label">Digital IDs Issued</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-number">{{active_visitors}}</div>
+          <div class="stat-label">Active Visitors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-plane-departure"></i>
+          </div>
+          <div class="stat-number">{{active_leaves}}</div>
+          <div class="stat-label">Active Leave Passes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <div class="stat-number">156</div>
+          <div class="stat-label">QR Codes Scanned Today</div>
+        </div>
+      </div>
+
+      <!-- QR Features -->
+      <div class="qr-features">
+        <!-- Student ID Generator -->
+        <div class="feature-card student-id">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-id-card"></i>
+            </div>
+            <h3 class="feature-title">Student Digital ID</h3>
+          </div>
+          <p class="feature-description">
+            Generate secure QR-coded digital IDs for students containing all essential information including room details, emergency contacts, and validity period.
+          </p>
+          <div class="feature-actions">
+            <a href="{{url_for('qr.student_id_generator')}}" class="action-btn btn-success">
+              <i class="fas fa-plus"></i>
+              Generate ID
+            </a>
+            <button class="action-btn btn-primary" onclick="viewAllIDs()">
+              <i class="fas fa-list"></i>
+              View All
+            </button>
+          </div>
+        </div>
+
+        <!-- Visitor Management -->
+        <div class="feature-card visitor">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-user-friends"></i>
+            </div>
+            <h3 class="feature-title">Visitor Entry System</h3>
+          </div>
+          <p class="feature-description">
+            Register visitors and generate time-limited QR codes for secure entry. Track visitor activity and manage access permissions efficiently.
+          </p>
+          <div class="feature-actions">
+            <a href="{{url_for('qr.visitor_management')}}" class="action-btn btn-primary">
+              <i class="fas fa-user-plus"></i>
+              Register Visitor
+            </a>
+            <button class="action-btn btn-success" onclick="viewVisitorLog()">
+              <i class="fas fa-history"></i>
+              View Log
+            </button>
+          </div>
+        </div>
+
+        <!-- Leave Pass System -->
+        <div class="feature-card leave-pass">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-plane-departure"></i>
+            </div>
+            <h3 class="feature-title">Digital Leave Pass</h3>
+          </div>
+          <p class="feature-description">
+            Issue digital leave passes with QR verification. Monitor student departures and returns with automated tracking and notifications.
+          </p>
+          <div class="feature-actions">
+            <a href="{{url_for('qr.leave_management')}}" class="action-btn btn-warning">
+              <i class="fas fa-ticket-alt"></i>
+              Issue Pass
+            </a>
+            <button class="action-btn btn-primary" onclick="viewLeaveHistory()">
+              <i class="fas fa-calendar-alt"></i>
+              View History
+            </button>
+          </div>
+        </div>
+
+        <!-- QR Scanner -->
+        <div class="feature-card scanner">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-qrcode"></i>
+            </div>
+            <h3 class="feature-title">QR Code Scanner</h3>
+          </div>
+          <p class="feature-description">
+            Scan and verify QR codes for student IDs, visitor passes, and leave permits. Real-time validation with security features.
+          </p>
+          <div class="feature-actions">
+            <a href="{{url_for('qr.qr_scanner')}}" class="action-btn btn-danger">
+              <i class="fas fa-camera"></i>
+              Open Scanner
+            </a>
+            <button class="action-btn btn-primary" onclick="viewScanHistory()">
+              <i class="fas fa-list-alt"></i>
+              Scan History
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="recent-activity">
+        <div class="activity-header">
+          <h3>📊 Recent QR Activity</h3>
+          <button class="btn btn-outline-primary btn-sm" onclick="refreshActivity()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+        
+        <div class="activity-item">
+          <div class="activity-icon activity-qr">
+            <i class="fas fa-id-card"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Digital ID generated for Alice Johnson</div>
+            <div class="activity-time">2 minutes ago</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon activity-visitor">
+            <i class="fas fa-user-friends"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Visitor John Smith checked in to Room 101</div>
+            <div class="activity-time">15 minutes ago</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon activity-leave">
+            <i class="fas fa-plane-departure"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Leave pass issued to Bob Brown for home visit</div>
+            <div class="activity-time">1 hour ago</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon activity-qr">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">QR code scanned at main entrance</div>
+            <div class="activity-time">2 hours ago</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2025 AI Powered Hostel Manager. All rights reserved.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    function viewAllIDs() {
+      window.location.href = '{{url_for("qr.student_id_generator")}}';
+    }
+
+    function viewVisitorLog() {
+      window.location.href = '{{url_for("qr.visitor_management")}}';
+    }
+
+    function viewLeaveHistory() {
+      window.location.href = '{{url_for("qr.leave_management")}}';
+    }
+
+    function viewScanHistory() {
+      alert('Scan History:\n\n• 156 scans today\n• 1,234 scans this week\n• 98% success rate\n• Last scan: 2 minutes ago');
+    }
+
+    function refreshActivity() {
+      // In a real application, this would fetch new activity data
+      window.location.reload();
+    }
+
+    // Add smooth animations
+    document.addEventListener('DOMContentLoaded', function() {
+      const cards = document.querySelectorAll('.feature-card');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animation = 'slideInUp 0.6s ease forwards';
+      });
+    });
+
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

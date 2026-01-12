@@ -1,0 +1,335 @@
+<!-- Chat Widget for Student Dashboard -->
+<div class="student-chat-widget" id="studentChatWidget">
+  <div class="student-chat-widget-header" onclick="toggleStudentChatWidget()">
+    <div class="student-chat-widget-title">
+      <span class="chat-icon">💬</span>
+      <span>Chat with Admin</span>
+      <span class="unread-count" id="studentUnreadCount" style="display: none;">0</span>
+    </div>
+    <div class="student-chat-widget-toggle" id="studentChatToggle">▼</div>
+  </div>
+  
+  <div class="student-chat-widget-body" id="studentChatWidgetBody" style="display: none;">
+    <div class="student-chat-messages" id="studentChatMessages">
+      <div class="loading-messages">Loading messages...</div>
+    </div>
+    
+    <div class="student-chat-input">
+      <form id="quickMessageForm" onsubmit="sendQuickMessage(event)">
+        <textarea id="quickMessageText" placeholder="Type a quick message..." rows="2" maxlength="500"></textarea>
+        <button type="submit" class="quick-send-btn">📤</button>
+      </form>
+    </div>
+    
+    <div class="student-chat-widget-actions">
+      <a href="{{url_for('t_message.inbox')}}" class="student-chat-action-btn">
+        📥 View All Messages
+      </a>
+      <a href="{{url_for('t_message.conversation')}}" class="student-chat-action-btn">
+        💬 Full Chat
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.student-chat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  z-index: 1000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.student-chat-widget-header {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.student-chat-widget-header:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+}
+
+.student-chat-widget-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+}
+
+.chat-icon {
+  font-size: 1.2em;
+}
+
+.unread-count {
+  background: #dc3545;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.student-chat-widget-toggle {
+  transition: transform 0.3s;
+}
+
+.student-chat-widget-toggle.open {
+  transform: rotate(180deg);
+}
+
+.student-chat-widget-body {
+  max-height: 450px;
+  border-radius: 0 0 12px 12px;
+}
+
+.student-chat-messages {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 15px;
+  background: #f8f9fa;
+}
+
+.quick-message {
+  margin-bottom: 15px;
+  display: flex;
+}
+
+.quick-message.sent {
+  justify-content: flex-end;
+}
+
+.quick-message.received {
+  justify-content: flex-start;
+}
+
+.quick-message-bubble {
+  max-width: 80%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  font-size: 0.9em;
+  line-height: 1.3;
+}
+
+.quick-message.sent .quick-message-bubble {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.quick-message.received .quick-message-bubble {
+  background: white;
+  color: #333;
+  border-bottom-left-radius: 5px;
+  border: 1px solid #e9ecef;
+}
+
+.quick-message-time {
+  font-size: 0.7em;
+  opacity: 0.7;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.student-chat-input {
+  padding: 15px;
+  border-top: 1px solid #e9ecef;
+  background: white;
+}
+
+.student-chat-input form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.student-chat-input textarea {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 20px;
+  resize: none;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.student-chat-input textarea:focus {
+  outline: none;
+  border-color: #28a745;
+}
+
+.quick-send-btn {
+  padding: 10px 15px;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-send-btn:hover {
+  transform: scale(1.1);
+}
+
+.student-chat-widget-actions {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.student-chat-action-btn {
+  flex: 1;
+  padding: 10px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.student-chat-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+.loading-messages {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.no-messages {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.no-messages-icon {
+  font-size: 2em;
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+</style>
+
+<script>
+let studentChatWidgetOpen = false;
+
+function toggleStudentChatWidget() {
+  const body = document.getElementById('studentChatWidgetBody');
+  const toggle = document.getElementById('studentChatToggle');
+  
+  if (studentChatWidgetOpen) {
+    body.style.display = 'none';
+    toggle.classList.remove('open');
+    studentChatWidgetOpen = false;
+  } else {
+    body.style.display = 'block';
+    toggle.classList.add('open');
+    studentChatWidgetOpen = true;
+    loadRecentMessages();
+  }
+}
+
+function loadRecentMessages() {
+  const messagesDiv = document.getElementById('studentChatMessages');
+  
+  // Simulate loading recent messages (replace with actual API call)
+  setTimeout(() => {
+    messagesDiv.innerHTML = `
+      <div class="quick-message received">
+        <div class="quick-message-bubble">
+          Welcome to the hostel! If you have any questions, feel free to ask.
+        </div>
+      </div>
+      <div class="quick-message-time">Admin • 2 hours ago</div>
+      <div class="quick-message sent">
+        <div class="quick-message-bubble">
+          Thank you! I'll reach out if I need anything.
+        </div>
+      </div>
+      <div class="quick-message-time">You • 1 hour ago</div>
+    `;
+    
+    // Update unread count
+    updateStudentUnreadCount(0);
+    
+    // Scroll to bottom
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }, 500);
+}
+
+function sendQuickMessage(event) {
+  event.preventDefault();
+  
+  const messageText = document.getElementById('quickMessageText');
+  const message = messageText.value.trim();
+  
+  if (!message) return;
+  
+  // Add message to chat
+  const messagesDiv = document.getElementById('studentChatMessages');
+  const messageElement = document.createElement('div');
+  messageElement.innerHTML = `
+    <div class="quick-message sent">
+      <div class="quick-message-bubble">${message}</div>
+    </div>
+    <div class="quick-message-time">You • Just now</div>
+  `;
+  
+  messagesDiv.appendChild(messageElement);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  
+  // Clear input
+  messageText.value = '';
+  
+  // Here you would normally send the message to the server
+  // For now, we'll just simulate it
+  console.log('Sending message:', message);
+}
+
+function updateStudentUnreadCount(count) {
+  const unreadElement = document.getElementById('studentUnreadCount');
+  if (count > 0) {
+    unreadElement.textContent = count;
+    unreadElement.style.display = 'inline';
+  } else {
+    unreadElement.style.display = 'none';
+  }
+}
+
+// Auto-resize textarea
+document.getElementById('quickMessageText').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+});
+
+// Auto-refresh messages every 30 seconds
+setInterval(() => {
+  if (studentChatWidgetOpen) {
+    loadRecentMessages();
+  }
+}, 30000);
+</script>

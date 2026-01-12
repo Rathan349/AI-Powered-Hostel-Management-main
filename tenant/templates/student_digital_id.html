@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Digital ID</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .id-header {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .id-card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .digital-id-card {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .digital-id-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(45deg);
+    }
+
+    .id-card-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .id-card-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .id-card-subtitle {
+      opacity: 0.8;
+      font-size: 0.9rem;
+    }
+
+    .id-card-body {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2rem;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .id-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      border: 3px solid rgba(255,255,255,0.3);
+    }
+
+    .id-details {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .id-detail {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .id-label {
+      opacity: 0.8;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .id-value {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .id-actions {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .action-btn {
+      padding: 1rem;
+      border: none;
+      border-radius: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-generate {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+    }
+
+    .btn-share {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      color: #212529;
+    }
+
+    .btn-print {
+      background: linear-gradient(135deg, #6f42c1, #5a32a3);
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .qr-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-top: 2rem;
+    }
+
+    .qr-placeholder {
+      width: 200px;
+      height: 200px;
+      border: 3px dashed #28a745;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      color: #28a745;
+      font-size: 3rem;
+      background: #f8f9fa;
+    }
+
+    .qr-code-display {
+      width: 200px;
+      height: 200px;
+      border: 3px solid #28a745;
+      border-radius: 15px;
+      margin: 0 auto 1rem;
+      padding: 1rem;
+      background: white;
+    }
+
+    .qr-code-display img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .id-features {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      margin-top: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #28a745;
+    }
+
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .feature-content h5 {
+      margin: 0 0 0.25rem 0;
+      color: #1d3557;
+      font-size: 1rem;
+    }
+
+    .feature-content p {
+      margin: 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .id-card-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .id-card-body {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1rem;
+      }
+      
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>{{student_data.name if student_data else 'Student'}}</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_qr.my_documents')}}">📱 Digital Documents</a>
+        <a href="{{url_for('t_qr.digital_id')}}" class="active">🆔 Digital ID</a>
+        <a href="{{url_for('t_qr.leave_request')}}">✈️ Leave Request</a>
+        <a href="{{url_for('t_qr.visitor_invite')}}">👥 Visitor Invite</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container">
+        <!-- Header -->
+        <div class="id-header">
+          <h1 class="mb-3">🆔 My Digital Student ID</h1>
+          <p class="mb-0">Your secure digital identification with QR code verification</p>
+        </div>
+
+        <!-- ID Card and Actions -->
+        <div class="id-card-container">
+          <!-- Digital ID Card -->
+          <div class="digital-id-card">
+            <div class="id-card-header">
+              <div class="id-card-title">Digital Student ID</div>
+              <div class="id-card-subtitle">AI Powered Hostel Management System</div>
+            </div>
+            <div class="id-card-body">
+              <div class="id-avatar">
+                {{student_data.name[0].upper() if student_data and student_data.name else 'S'}}
+              </div>
+              <div class="id-details">
+                <div class="id-detail">
+                  <span class="id-label">
+                    <i class="fas fa-user"></i>
+                    Name:
+                  </span>
+                  <span class="id-value">{{student_data.name if student_data else 'Student Name'}}</span>
+                </div>
+                <div class="id-detail">
+                  <span class="id-label">
+                    <i class="fas fa-id-badge"></i>
+                    Student ID:
+                  </span>
+                  <span class="id-value">{{student_id}}</span>
+                </div>
+                <div class="id-detail">
+                  <span class="id-label">
+                    <i class="fas fa-home"></i>
+                    Room:
+                  </span>
+                  <span class="id-value">{{student_data.room if student_data else 'N/A'}}</span>
+                </div>
+                <div class="id-detail">
+                  <span class="id-label">
+                    <i class="fas fa-building"></i>
+                    Block:
+                  </span>
+                  <span class="id-value">{{student_data.block if student_data else 'A'}}</span>
+                </div>
+                <div class="id-detail">
+                  <span class="id-label">
+                    <i class="fas fa-phone"></i>
+                    Phone:
+                  </span>
+                  <span class="id-value">{{student_data.phone if student_data else 'N/A'}}</span>
+                </div>
+                <div class="id-detail">
+                  <span class="id-label">
+                    <i class="fas fa-calendar"></i>
+                    Valid Until:
+                  </span>
+                  <span class="id-value">Dec 2025</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions Panel -->
+          <div class="id-actions">
+            <h3 class="mb-3">🎯 ID Actions</h3>
+            <div class="action-grid">
+              <button class="action-btn btn-generate" onclick="generateQR()">
+                <i class="fas fa-qrcode"></i>
+                Generate QR
+              </button>
+              <button class="action-btn btn-download" onclick="downloadID()" id="downloadBtn" disabled>
+                <i class="fas fa-download"></i>
+                Download
+              </button>
+              <button class="action-btn btn-share" onclick="shareID()" id="shareBtn" disabled>
+                <i class="fas fa-share"></i>
+                Share
+              </button>
+              <button class="action-btn btn-print" onclick="printID()" id="printBtn" disabled>
+                <i class="fas fa-print"></i>
+                Print
+              </button>
+            </div>
+
+            <!-- QR Code Display -->
+            <div class="qr-section">
+              <h4 class="mb-3">📱 QR Code</h4>
+              <div id="qrPlaceholder" class="qr-placeholder">
+                <i class="fas fa-qrcode"></i>
+              </div>
+              <div id="qrCodeDisplay" class="qr-code-display" style="display: none;">
+                <img id="qrCodeImage" src="" alt="QR Code">
+              </div>
+              <p class="text-muted mt-2">Click "Generate QR" to create your digital ID QR code</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ID Features -->
+        <div class="id-features">
+          <h3 class="mb-3">✨ Digital ID Features</h3>
+          <div class="features-grid">
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Secure Verification</h5>
+                <p>Encrypted QR code with security hash validation</p>
+              </div>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-mobile-alt"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Mobile Friendly</h5>
+                <p>Scan with any QR code reader or smartphone camera</p>
+              </div>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Always Valid</h5>
+                <p>Your ID remains valid throughout your stay</p>
+              </div>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-icon">
+                <i class="fas fa-user-check"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Instant Recognition</h5>
+                <p>Quick identification at hostel entry points</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentQRData = null;
+
+    async function generateQR() {
+      const generateBtn = document.querySelector('.btn-generate');
+      const originalText = generateBtn.innerHTML;
+      
+      // Show loading state
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
+      try {
+        const response = await fetch('/student_qr/generate_my_qr');
+        const data = await response.json();
+
+        if (data.success) {
+          currentQRData = data;
+          displayQR(data.qr_code);
+          enableActions();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error generating QR code: ' + error.message);
+      } finally {
+        // Reset button
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = originalText;
+      }
+    }
+
+    function displayQR(qrCodeData) {
+      const placeholder = document.getElementById('qrPlaceholder');
+      const display = document.getElementById('qrCodeDisplay');
+      const image = document.getElementById('qrCodeImage');
+
+      placeholder.style.display = 'none';
+      display.style.display = 'block';
+      image.src = qrCodeData;
+    }
+
+    function enableActions() {
+      document.getElementById('downloadBtn').disabled = false;
+      document.getElementById('shareBtn').disabled = false;
+      document.getElementById('printBtn').disabled = false;
+    }
+
+    function downloadID() {
+      if (!currentQRData) return;
+
+      const link = document.createElement('a');
+      link.download = 'my_digital_id.png';
+      link.href = currentQRData.qr_code;
+      link.click();
+    }
+
+    function shareID() {
+      if (!currentQRData) return;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'My Digital Student ID',
+          text: 'My digital hostel ID with QR code',
+          url: window.location.href
+        });
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert('Link copied to clipboard!');
+        });
+      }
+    }
+
+    function printID() {
+      if (!currentQRData) return;
+
+      const printContent = `
+        <html>
+          <head>
+            <title>Digital Student ID</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+              .id-card { 
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                margin: 20px auto;
+                max-width: 400px;
+              }
+              .qr-code { margin: 20px 0; }
+              .qr-code img { width: 200px; height: 200px; }
+            </style>
+          </head>
+          <body>
+            <div class="id-card">
+              <h2>DIGITAL STUDENT ID</h2>
+              <p>AI Powered Hostel Management</p>
+              <div>
+                <p><strong>Name:</strong> {{student_data.name if student_data else 'Student Name'}}</p>
+                <p><strong>ID:</strong> {{student_id}}</p>
+                <p><strong>Room:</strong> {{student_data.room if student_data else 'N/A'}}</p>
+              </div>
+            </div>
+            <div class="qr-code">
+              <img src="${currentQRData.qr_code}" alt="QR Code">
+              <p>Scan this QR code for verification</p>
+            </div>
+          </body>
+        </html>
+      `;
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    // Add smooth animations
+    document.addEventListener('DOMContentLoaded', function() {
+      const card = document.querySelector('.digital-id-card');
+      card.style.animation = 'slideInLeft 0.8s ease forwards';
+      
+      const actions = document.querySelector('.id-actions');
+      actions.style.animation = 'slideInRight 0.8s ease forwards';
+    });
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

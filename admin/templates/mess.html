@@ -1,0 +1,291 @@
+<!-- File: mess.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mess Management</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    .mess-schedule h2 {
+      text-decoration: underline;
+      text-decoration-color: #1d3557;
+    }
+
+    table input.form-control {
+      font-size: 0.9rem;
+      padding: 0.4rem;
+      border-radius: 6px;
+    }
+
+
+    #AddMenuBtn {
+      margin-bottom: 30px;
+      padding: 10px 16px;
+      background-color: #22c55e;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+
+    #AddMenuBtn:hover {
+      background-color: #16a34a;
+    }
+
+    .menu-item {
+      font-weight: 500;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 450px;
+      background-color: #e0e7ff;
+      padding: 8px 15px;
+      border-radius: 8px;
+    }
+
+    .menu-item button.delete-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .mess-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+
+    .mess-table th,
+    .mess-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eaeaea;
+    }
+
+    .mess-table th {
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    .mess-table tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .pagination button {
+      background-color: #1d3557;
+      color: white;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .pagination button:hover {
+      background-color: #457b9d;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}" class="active">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="admin.html">🧑‍💼 Admin Panel</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>🍽️ Mess Attendance & Menu</h1>
+        <p>Track daily attendance and view planned meals.</p>
+      </header>
+
+      <section class="mess-schedule">
+        <h2 class="mb-4">🗓️ Weekly Mess Menu Planner</h2>
+
+        <form action="{{ url_for('mess.save_menu') }}" method="POST">
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+              <thead class="table-light">
+                <tr>
+                  <th>Day</th>
+                  <th>Breakfast</th>
+                  <th>Lunch</th>
+                  <th>Dinner</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                <tr>
+                  <td class="fw-bold">{{ day }}</td>
+                  <td>
+                    <input type="text" name="{{ day|lower }}_breakfast" class="form-control"
+                      placeholder="e.g. Paratha & Tea" required>
+                  </td>
+                  <td>
+                    <input type="text" name="{{ day|lower }}_lunch" class="form-control"
+                      placeholder="e.g. Chicken Biryani" required>
+                  </td>
+                  <td>
+                    <input type="text" name="{{ day|lower }}_dinner" class="form-control" placeholder="e.g. Daal & Roti"
+                      required>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-end mt-3">
+            <button type="submit" class="btn btn-primary px-4 py-2">
+              💾 Save Weekly Menu
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <br><br>
+
+
+      <div class="mess-table">
+        <table class="mess-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Breakfast</th>
+              <th>Lunch</th>
+              <th>Dinner</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+            <tr>
+              <td>{{row["name"]}}</td>
+              <td>{{'✅' if row["attendance"]["breakfast"] else '❌'}}</td>
+              <td>{{'✅' if row["attendance"]["lunch"] else '❌'}}</td>
+              <td>{{'✅' if row["attendance"]["dinner"] else '❌'}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          {% if page > 1 %}
+          <a href="{{url_for('dashboard.manage_mess', page = page - 1)}}">
+            <button id="prevBtn">⏪ Previous</button>
+          </a>
+          {% endif %}
+
+          {% if total_pages == 0 %}
+          {% set total_pages = 1 %}
+          {% endif %}
+
+          <span id="pageInfo">Page {{page}} of  {{total_pages}}</span>
+
+          {% if page < total_pages %} <a href="{{url_for('dashboard.manage_mess', page = page + 1)}}">
+            <button id="nextBtn">Next ⏩</button>
+            </a>
+            {% endif %}
+        </div>
+
+      </div>
+
+
+      <footer class="footer">
+        <p>&copy; 2025 Hostel Manager. All rights reserved.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const AddMenuBtn = document.getElementById("AddMenuBtn");
+      const Menu = document.getElementById("menu")
+      const MenuField = document.getElementById("menuInput");
+      const MenuFieldBtn = document.getElementById("menuOkBtn");
+      const tempDiv = document.getElementById("menuInputArea");
+
+      AddMenuBtn.addEventListener("click", function () {
+
+        const divs = document.querySelectorAll("#menu div");
+
+        if (divs.length >= 3) {
+
+          alert("Maximum of 3 items are allowed");
+          return;
+        }
+
+        tempDiv.style.display = "block";
+        tempDiv.focus();
+
+      });
+
+      MenuFieldBtn.addEventListener("click", function () {
+        const newItem = MenuField.value.trim();
+
+        const currentItems = document.querySelectorAll("#menu .menu-item");
+
+        if (currentItems.length >= 3) {
+          alert("Maximum of 3 menu items allowed!");
+          return;
+        }
+
+        if (newItem !== "") {
+          const itemDiv = document.createElement("div");
+          itemDiv.className = "menu-item";
+          itemDiv.innerHTML = `
+          ${newItem}
+          <button class="delete-btn">❌</button>
+        `;
+          Menu.appendChild(itemDiv);
+          menuInput.value = "";
+          menuInputArea.style.display = "none";
+        } else {
+          alert("Please enter a menu item.");
+        }
+      });
+
+
+
+      Menu.addEventListener("click", function (e) {
+        if (e.target.classList.contains("delete-btn")) {
+          e.target.parentElement.remove();
+        }
+      });
+
+
+    });
+  </script></body>
+
+</html>

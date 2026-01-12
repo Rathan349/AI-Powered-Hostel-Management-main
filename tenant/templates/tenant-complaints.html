@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Student Complaints</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .complaint-form-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .form-container {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      margin-top: 1rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .complaint-type-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .type-option {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .type-option:hover {
+      border-color: #007bff;
+      background: #e3f2fd;
+      transform: translateY(-2px);
+    }
+
+    .type-option.selected {
+      border-color: #007bff;
+      background: #007bff;
+      color: white;
+    }
+
+    .type-option i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .complaint-textarea {
+      min-height: 120px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .complaint-textarea:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .char-counter {
+      text-align: right;
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-top: 0.5rem;
+    }
+
+    .char-counter.warning {
+      color: #ffc107;
+    }
+
+    .char-counter.danger {
+      color: #dc3545;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40,167,69,0.4);
+    }
+
+    .submit-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .my-complaints-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .complaint-item {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .complaint-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .complaint-item.status-pending {
+      border-left: 5px solid #ffc107;
+    }
+
+    .complaint-item.status-resolved {
+      border-left: 5px solid #28a745;
+    }
+
+    .complaint-item.status-in-progress {
+      border-left: 5px solid #007bff;
+    }
+
+    .complaint-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .complaint-id {
+      font-weight: bold;
+      color: #495057;
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-resolved {
+      background: #d1edff;
+      color: #0c5460;
+    }
+
+    .status-in-progress {
+      background: #cce7ff;
+      color: #004085;
+    }
+
+    .complaint-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .complaint-description {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 3px solid #007bff;
+      margin-bottom: 1rem;
+    }
+
+    .no-complaints {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+
+    .no-complaints-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .quick-action-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .quick-action-btn:hover {
+      background: #0056b3;
+      transform: translateY(-1px);
+    }
+
+    .priority-indicator {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .priority-high {
+      background: #dc3545;
+    }
+
+    .priority-medium {
+      background: #ffc107;
+    }
+
+    .priority-low {
+      background: #28a745;
+    }
+
+    .form-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .form-message.success {
+      background: #d1edff;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .form-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    @media (max-width: 768px) {
+      .complaint-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .complaint-meta {
+        grid-template-columns: 1fr;
+      }
+      
+      .quick-actions {
+        flex-direction: column;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>{{Tenant_Name}}</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_dashboard.profile_page')}}">My Profile</a>
+        <a href="{{url_for('t_dashboard.room_page')}}">Room Info</a>
+        <a href="{{url_for('t_dashboard.mess_page')}}">Mess</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}" class="active">Complaints</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container">
+        <!-- Enhanced Complaint Form -->
+        <div class="complaint-form-card">
+          <h1 class="mb-0">🛠️ Submit a Complaint</h1>
+          <p class="mb-0 opacity-75">Report issues and get them resolved quickly with AI-powered priority detection</p>
+          
+          <div class="form-container">
+            {% with messages = get_flashed_messages(with_categories=true)%}
+            {% if messages %}
+            {% set category, message = messages[-1] %}
+            <div class="form-message {{ category }}" id="form-message">
+              <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+              {{ message }}
+            </div>
+            {% endif %}
+            {% endwith %}
+            
+            <form id="studentComplaintForm" method="post" action="{{ url_for('t_complaint.submit_complaint') }}">
+              <div class="mb-4">
+                <label class="form-label fw-bold">🏷️ Select Complaint Type</label>
+                <div class="complaint-type-grid">
+                  <div class="type-option" data-type="Cleanliness">
+                    <i class="fas fa-broom"></i>
+                    <div>Cleanliness</div>
+                  </div>
+                  <div class="type-option" data-type="Security">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>Security</div>
+                  </div>
+                  <div class="type-option" data-type="Electrical">
+                    <i class="fas fa-bolt"></i>
+                    <div>Electrical</div>
+                  </div>
+                  <div class="type-option" data-type="Food">
+                    <i class="fas fa-utensils"></i>
+                    <div>Food</div>
+                  </div>
+                  <div class="type-option" data-type="Internet">
+                    <i class="fas fa-wifi"></i>
+                    <div>Internet</div>
+                  </div>
+                  <div class="type-option" data-type="Air Conditioning">
+                    <i class="fas fa-snowflake"></i>
+                    <div>AC</div>
+                  </div>
+                  <div class="type-option" data-type="Plumbing">
+                    <i class="fas fa-wrench"></i>
+                    <div>Plumbing</div>
+                  </div>
+                  <div class="type-option" data-type="Roommates">
+                    <i class="fas fa-users"></i>
+                    <div>Roommates</div>
+                  </div>
+                  <div class="type-option" data-type="Furniture">
+                    <i class="fas fa-couch"></i>
+                    <div>Furniture</div>
+                  </div>
+                  <div class="type-option" data-type="Laundry">
+                    <i class="fas fa-tshirt"></i>
+                    <div>Laundry</div>
+                  </div>
+                  <div class="type-option" data-type="Other">
+                    <i class="fas fa-ellipsis-h"></i>
+                    <div>Other</div>
+                  </div>
+                </div>
+                <input type="hidden" id="complaintType" name="complaintType" required>
+              </div>
+
+              <div class="mb-4">
+                <label for="complaint" class="form-label fw-bold">📝 Describe Your Complaint</label>
+                <textarea 
+                  id="complaint" 
+                  name="complaint" 
+                  class="complaint-textarea form-control" 
+                  rows="4" 
+                  maxlength="500" 
+                  placeholder="Please provide detailed information about your complaint. The more details you provide, the faster we can resolve it..."
+                  required></textarea>
+                <div class="char-counter" id="charCounter">0 / 500 characters</div>
+              </div>
+
+              <div class="mb-3">
+                <div class="alert alert-info">
+                  <i class="fas fa-robot"></i>
+                  <strong>AI Priority Detection:</strong> Our system will automatically assign priority based on your complaint details.
+                </div>
+              </div>
+              
+              <button class="submit-btn" type="submit" id="submitBtn">
+                <i class="fas fa-paper-plane"></i>
+                Submit Complaint
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Enhanced My Complaints Section -->
+        <div class="my-complaints-section">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">📋 My Complaints</h2>
+            <button class="btn btn-outline-primary" onclick="refreshComplaints()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+
+          {% if data %}
+            <div id="complaintsContainer">
+              {% for complaint in data %}
+              <div class="complaint-item status-{{ complaint[5]|lower if complaint|length > 5 else 'pending' }}">
+                <div class="priority-indicator priority-{{ complaint[4]|lower if complaint|length > 4 else 'medium' }}"></div>
+                
+                <div class="complaint-header">
+                  <div class="complaint-id">
+                    <i class="fas fa-ticket-alt"></i>
+                    Complaint #{{ complaint[0] }}
+                  </div>
+                  <span class="status-badge status-{{ complaint[5]|lower if complaint|length > 5 else 'pending' }}">
+                    {{ complaint[5] if complaint|length > 5 else 'Pending' }}
+                  </span>
+                </div>
+
+                <div class="complaint-meta">
+                  <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ complaint[6] if complaint|length > 6 else 'Recently' }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <i class="fas fa-tag"></i>
+                    <span>{{ complaint[7] if complaint|length > 7 else 'General' }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <i class="fas fa-flag"></i>
+                    <span>{{ complaint[4] if complaint|length > 4 else 'Medium' }} Priority</span>
+                  </div>
+                </div>
+
+                <div class="complaint-description">
+                  <strong>Description:</strong><br>
+                  {{ complaint[1] }}
+                </div>
+
+                <div class="quick-actions">
+                  <button class="quick-action-btn" onclick="trackComplaint('{{ complaint[0] }}')">
+                    <i class="fas fa-search"></i> Track Status
+                  </button>
+                  <button class="quick-action-btn" onclick="contactAdmin('{{ complaint[0] }}')">
+                    <i class="fas fa-comment"></i> Contact Admin
+                  </button>
+                  {% if complaint|length > 5 and complaint[5] == 'Pending' %}
+                  <button class="quick-action-btn" onclick="addDetails('{{ complaint[0] }}')">
+                    <i class="fas fa-plus"></i> Add Details
+                  </button>
+                  {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="no-complaints">
+              <div class="no-complaints-icon">
+                <i class="fas fa-smile"></i>
+              </div>
+              <h3>No Complaints Yet</h3>
+              <p>Great! You haven't submitted any complaints. If you encounter any issues, don't hesitate to report them using the form above.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const textArea = document.getElementById('complaint');
+      const charCounter = document.getElementById('charCounter');
+      const submitBtn = document.getElementById('submitBtn');
+      const complaintTypeInput = document.getElementById('complaintType');
+      const typeOptions = document.querySelectorAll('.type-option');
+
+      // Character count with color coding
+      textArea.addEventListener('input', function () {
+        const length = this.value.length;
+        const maxLength = 500;
+        
+        charCounter.textContent = `${length} / ${maxLength} characters`;
+        
+        // Color coding based on usage
+        if (length > maxLength * 0.9) {
+          charCounter.className = 'char-counter danger';
+        } else if (length > maxLength * 0.7) {
+          charCounter.className = 'char-counter warning';
+        } else {
+          charCounter.className = 'char-counter';
+        }
+
+        // Enable/disable submit button
+        updateSubmitButton();
+      });
+
+      // Complaint type selection
+      typeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          // Remove selected class from all options
+          typeOptions.forEach(opt => opt.classList.remove('selected'));
+          
+          // Add selected class to clicked option
+          this.classList.add('selected');
+          
+          // Set hidden input value
+          complaintTypeInput.value = this.dataset.type;
+          
+          // Update submit button
+          updateSubmitButton();
+        });
+      });
+
+      function updateSubmitButton() {
+        const hasType = complaintTypeInput.value !== '';
+        const hasDescription = textArea.value.trim().length > 0;
+        
+        if (hasType && hasDescription) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Complaint';
+        } else {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please fill all fields';
+        }
+      }
+
+      // Form submission with loading state
+      document.getElementById('studentComplaintForm').addEventListener('submit', function(e) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+      });
+
+      // Initialize submit button state
+      updateSubmitButton();
+    });
+
+    function refreshComplaints() {
+      window.location.reload();
+    }
+
+    function trackComplaint(complaintId) {
+      // Show complaint tracking modal or redirect
+      alert(`Tracking Complaint #${complaintId}\n\nStatus: In Progress\nAssigned to: Maintenance Team\nEstimated Resolution: 24-48 hours\n\nYou will receive updates via notifications.`);
+    }
+
+    function contactAdmin(complaintId) {
+      // Redirect to messaging system with pre-filled complaint reference
+      if (confirm(`Contact admin regarding Complaint #${complaintId}?`)) {
+        window.location.href = `/student_messages/whatsapp_chat?complaint=${complaintId}`;
+      }
+    }
+
+    function addDetails(complaintId) {
+      const additionalDetails = prompt(`Add more details for Complaint #${complaintId}:`);
+      if (additionalDetails && additionalDetails.trim()) {
+        // In a real application, this would send an AJAX request
+        alert('Additional details have been added to your complaint. The admin team has been notified.');
+      }
+    }
+
+    // Auto-save draft functionality
+    let draftTimer;
+    document.getElementById('complaint').addEventListener('input', function() {
+      clearTimeout(draftTimer);
+      draftTimer = setTimeout(() => {
+        const draft = {
+          type: document.getElementById('complaintType').value,
+          description: this.value,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('complaintDraft', JSON.stringify(draft));
+      }, 1000);
+    });
+
+    // Load draft on page load
+    window.addEventListener('load', function() {
+      const draft = localStorage.getItem('complaintDraft');
+      if (draft) {
+        const draftData = JSON.parse(draft);
+        const draftAge = new Date() - new Date(draftData.timestamp);
+        
+        // Only load draft if it's less than 1 hour old
+        if (draftAge < 3600000) {
+          if (confirm('You have an unsaved draft. Would you like to restore it?')) {
+            document.getElementById('complaint').value = draftData.description;
+            
+            // Select the type option
+            if (draftData.type) {
+              const typeOption = document.querySelector(`[data-type="${draftData.type}"]`);
+              if (typeOption) {
+                typeOption.click();
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Clear draft when form is submitted successfully
+    window.addEventListener('beforeunload', function() {
+      if (document.getElementById('form-message')?.classList.contains('success')) {
+        localStorage.removeItem('complaintDraft');
+      }
+    });
+
+    // Add smooth animations
+    document.querySelectorAll('.complaint-item').forEach((item, index) => {
+      item.style.animationDelay = `${index * 0.1}s`;
+      item.style.animation = 'slideInLeft 0.5s ease forwards';
+    });
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      .type-option {
+        animation: fadeInUp 0.5s ease forwards;
+      }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+
+</html>

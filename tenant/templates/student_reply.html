@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reply Message</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>Student Portal</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_dashboard.profile_page')}}">Profile</a>
+        <a href="{{url_for('t_dashboard.room_page')}}">Room Info</a>
+        <a href="{{url_for('t_dashboard.mess_page')}}">Mess</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}">Complaints</a>
+        <a href="{{url_for('t_message.inbox')}}" class="active">Messages</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+    <main class="student-main">
+      <div class="container-fluid">
+        <h1 class="mb-3">↩️ Reply to Message</h1>
+      <div class="form-card" style="background-color: #f8f9fa; padding: 15px; margin-bottom: 20px;">
+        <p><strong>Original Message:</strong></p>
+        <p><strong>From:</strong> Admin</p>
+        <p><strong>Subject:</strong> {{original_message.get('subject')}}</p>
+        <p style="white-space: pre-wrap; color: #666;">{{original_message.get('message')}}</p>
+      </div>
+      <form method="POST" class="form-card">
+        <label for="message">Your Reply</label>
+        <textarea id="message" name="message" rows="8" required placeholder="Type your reply..."></textarea>
+        <button type="submit">Send Reply</button>
+        <a href="{{url_for('t_message.inbox')}}"><button type="button" style="background-color: #6c757d;">Cancel</button></a>
+      </form>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

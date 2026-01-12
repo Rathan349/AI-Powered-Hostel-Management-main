@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat with Admin - Student Portal</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #e5ddd5;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .whatsapp-container {
+      display: flex;
+      height: 100vh;
+      background: #f0f0f0;
+    }
+
+    /* Student Sidebar */
+    .student-sidebar {
+      width: 80px;
+      background: #25d366;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .student-avatar-large {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: white;
+      color: #25d366;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .nav-item {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: white;
+      font-size: 18px;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Chat Area */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #e5ddd5;
+    }
+
+    .chat-header {
+      background: #00a884;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .admin-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #dc3545;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .admin-info h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .admin-info p {
+      margin: 2px 0 0 0;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .chat-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-action-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+
+    .chat-action-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="chat-bg" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="2" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23chat-bg)"/></svg>');
+    }
+
+    .message {
+      display: flex;
+      margin-bottom: 8px;
+      animation: messageSlideIn 0.3s ease;
+    }
+
+    .message.sent {
+      justify-content: flex-end;
+    }
+
+    .message.received {
+      justify-content: flex-start;
+    }
+
+    .message-bubble {
+      max-width: 65%;
+      padding: 8px 12px;
+      border-radius: 7.5px;
+      position: relative;
+      word-wrap: break-word;
+      box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+    }
+
+    .message.sent .message-bubble {
+      background: #d9fdd3;
+      color: #111;
+      border-bottom-right-radius: 2px;
+    }
+
+    .message.received .message-bubble {
+      background: white;
+      color: #111;
+      border-bottom-left-radius: 2px;
+    }
+
+    .message-text {
+      font-size: 14px;
+      line-height: 1.4;
+      margin-bottom: 5px;
+    }
+
+    .message-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #667781;
+    }
+
+    .message-time {
+      font-size: 11px;
+      color: #667781;
+    }
+
+    .message-status {
+      display: flex;
+      align-items: center;
+    }
+
+    .message.sent .message-status::after {
+      content: '✓✓';
+      color: #53bdeb;
+      font-size: 12px;
+    }
+
+    .message-date-separator {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .date-badge {
+      background: rgba(255,255,255,0.8);
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      color: #667781;
+      display: inline-block;
+    }
+
+    /* Chat Input */
+    .chat-input {
+      background: #f0f0f0;
+      padding: 10px 20px;
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .input-container {
+      flex: 1;
+      background: white;
+      border-radius: 20px;
+      display: flex;
+      align-items: flex-end;
+      min-height: 40px;
+      max-height: 120px;
+      overflow: hidden;
+    }
+
+    .message-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 10px 15px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      max-height: 100px;
+      min-height: 20px;
+      background: transparent;
+    }
+
+    .send-button {
+      background: #00a884;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .send-button:hover {
+      background: #008f72;
+    }
+
+    .send-button svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    .empty-chat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #667781;
+      text-align: center;
+    }
+
+    .empty-chat-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    @keyframes messageSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .typing-indicator {
+      display: none;
+      padding: 10px 20px;
+      font-size: 14px;
+      color: #667781;
+      font-style: italic;
+    }
+
+    .typing-dots {
+      display: inline-flex;
+      gap: 2px;
+    }
+
+    .typing-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #667781;
+      animation: typingDot 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingDot {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-10px); }
+    }
+
+    .welcome-message {
+      background: rgba(255,255,255,0.9);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px;
+      text-align: center;
+      border-left: 4px solid #25d366;
+    }
+
+    .welcome-message h3 {
+      margin: 0 0 10px 0;
+      color: #25d366;
+    }
+
+    .welcome-message p {
+      margin: 5px 0;
+      color: #667781;
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .student-sidebar {
+        width: 60px;
+        padding: 15px 0;
+      }
+      
+      .student-avatar-large {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+      
+      .nav-item {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="whatsapp-container">
+    <!-- Student Sidebar -->
+    <div class="student-sidebar">
+      <div class="student-avatar-large" id="studentAvatar">{{Tenant_Name[0] if Tenant_Name else 'S'}}</div>
+      
+      <div class="sidebar-nav">
+        <a href="{{url_for('t_dashboard.dashboard_page')}}" class="nav-item" title="Dashboard">🏠</a>
+        <a href="#" class="nav-item active" title="Chat">💬</a>
+        <a href="{{url_for('t_message.inbox')}}" class="nav-item" title="Messages">📥</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}" class="nav-item" title="Complaints">🛠️</a>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <div class="chat-header">
+        <div class="admin-avatar">A</div>
+        <div class="admin-info">
+          <h3>Hostel Admin</h3>
+          <p>Official Support • Always here to help</p>
+        </div>
+        <div class="chat-actions">
+          <button class="chat-action-btn" onclick="clearChat()">🗑️ Clear</button>
+          <button class="chat-action-btn" onclick="goBack()">← Back</button>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+          <h3>👋 Welcome to Admin Chat</h3>
+          <p>Hi {{Tenant_Name}}! This is your direct line to the hostel administration.</p>
+          <p>Feel free to ask questions about:</p>
+          <p>🏠 Room issues • 🍽️ Mess services • 💰 Fee inquiries • 🛠️ Maintenance requests</p>
+        </div>
+        <!-- Messages will be loaded here -->
+      </div>
+
+      <div class="typing-indicator" id="typingIndicator">
+        <span>Admin is typing</span>
+        <div class="typing-dots">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+
+      <div class="chat-input">
+        <div class="input-container">
+          <textarea 
+            class="message-input" 
+            id="messageInput" 
+            placeholder="Type a message to admin..." 
+            rows="1"
+            maxlength="1000"></textarea>
+        </div>
+        <button class="send-button" id="sendButton" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let messages = [];
+    const studentId = '{{session.get("tenant_id")}}';
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      loadMessages();
+      setupMessageInput();
+    });
+
+    function loadMessages() {
+      // Simulate loading messages (replace with actual API call)
+      fetch('/student_messages/api/conversation')
+        .then(response => response.json())
+        .then(data => {
+          messages = data.messages || [];
+          renderMessages();
+        })
+        .catch(error => {
+          console.error('Error loading messages:', error);
+          // Fallback with sample messages
+          messages = [
+            {
+              id: 1,
+              sender_type: 'admin',
+              message: 'Hello! Welcome to the hostel. How can I help you today?',
+              timestamp: '2024-12-17T09:00:00',
+              date: '2024-12-17'
+            },
+            {
+              id: 2,
+              sender_type: 'student',
+              message: 'Hi! Thank you for the warm welcome. I just wanted to introduce myself.',
+              timestamp: '2024-12-17T09:05:00',
+              date: '2024-12-17'
+            },
+            {
+              id: 3,
+              sender_type: 'admin',
+              message: 'That\'s wonderful! If you have any questions or need assistance with anything, please don\'t hesitate to reach out. We\'re here to make your stay comfortable.',
+              timestamp: '2024-12-17T09:07:00',
+              date: '2024-12-17'
+            }
+          ];
+          renderMessages();
+        });
+    }
+
+    function renderMessages() {
+      const container = document.getElementById('chatMessages');
+      const welcomeMessage = container.querySelector('.welcome-message');
+      
+      if (messages.length === 0) {
+        // Keep welcome message only
+        return;
+      }
+
+      let currentDate = '';
+      let html = welcomeMessage ? welcomeMessage.outerHTML : '';
+
+      messages.forEach(msg => {
+        const msgDate = new Date(msg.timestamp).toDateString();
+        
+        // Add date separator if date changed
+        if (msgDate !== currentDate) {
+          currentDate = msgDate;
+          const dateLabel = msgDate === new Date().toDateString() ? 'Today' : 
+                           msgDate === new Date(Date.now() - 86400000).toDateString() ? 'Yesterday' : 
+                           new Date(msg.timestamp).toLocaleDateString();
+          
+          html += `
+            <div class="message-date-separator">
+              <div class="date-badge">${dateLabel}</div>
+            </div>
+          `;
+        }
+
+        const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        html += `
+          <div class="message ${msg.sender_type === 'student' ? 'sent' : 'received'}">
+            <div class="message-bubble">
+              <div class="message-text">${msg.message}</div>
+              <div class="message-footer">
+                <span class="message-time">${time}</span>
+                ${msg.sender_type === 'student' ? '<span class="message-status"></span>' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      scrollToBottom();
+    }
+
+    function setupMessageInput() {
+      const input = document.getElementById('messageInput');
+      const sendBtn = document.getElementById('sendButton');
+
+      // Auto-resize textarea
+      input.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        
+        // Enable/disable send button
+        sendBtn.style.opacity = this.value.trim() ? '1' : '0.5';
+      });
+
+      // Handle Enter key
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      
+      if (!message) return;
+
+      // Add message to UI immediately
+      addMessageToUI('student', message);
+      
+      // Clear input
+      input.value = '';
+      input.style.height = 'auto';
+      
+      // Send to server
+      fetch('/student_messages/api/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          subject: 'Chat Message'
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Message sent successfully');
+        } else {
+          console.error('Failed to send message');
+        }
+      })
+      .catch(error => {
+        console.error('Error sending message:', error);
+      });
+    }
+
+    function addMessageToUI(senderType, message) {
+      const container = document.getElementById('chatMessages');
+      const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      
+      const messageElement = document.createElement('div');
+      messageElement.className = `message ${senderType === 'student' ? 'sent' : 'received'}`;
+      messageElement.innerHTML = `
+        <div class="message-bubble">
+          <div class="message-text">${message}</div>
+          <div class="message-footer">
+            <span class="message-time">${time}</span>
+            ${senderType === 'student' ? '<span class="message-status"></span>' : ''}
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(messageElement);
+      scrollToBottom();
+    }
+
+    function scrollToBottom() {
+      const container = document.getElementById('chatMessages');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function clearChat() {
+      if (confirm('Are you sure you want to clear this conversation? This cannot be undone.')) {
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = `
+          <div class="welcome-message">
+            <h3>🗑️ Conversation Cleared</h3>
+            <p>Your chat history has been cleared.</p>
+            <p>Start a new conversation by sending a message below.</p>
+          </div>
+        `;
+      }
+    }
+
+    function goBack() {
+      window.location.href = '{{url_for("t_dashboard.dashboard_page")}}';
+    }
+
+    // Auto-refresh messages every 10 seconds
+    setInterval(() => {
+      loadMessages();
+    }, 10000);
+
+    // Show typing indicator occasionally (simulate admin typing)
+    setInterval(() => {
+      if (Math.random() < 0.1) { // 10% chance
+        showTypingIndicator();
+        setTimeout(hideTypingIndicator, 2000);
+      }
+    }, 30000);
+
+    function showTypingIndicator() {
+      document.getElementById('typingIndicator').style.display = 'block';
+      scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+      document.getElementById('typingIndicator').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!-- File: resend.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resend Code</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='student.css') }}">
+</head>
+<body>
+  <div class="student-container center-screen">
+    <div class="login-card">
+      <h2>📨 Code Sent</h2>
+      <p>A new verification code has been sent to your email address.</p>
+      <button class="btn" onclick="window.location.href='student-verify-code.html'">Verify It</button>
+    </div>
+  </div>
+</body>
+</html>

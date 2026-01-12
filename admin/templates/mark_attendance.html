@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - Hostel Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .attendance-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .date-selector {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .date-selector label {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1em;
+        }
+        .date-selector input {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .date-selector button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .date-selector button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .present { color: #28a745; }
+        .absent { color: #dc3545; }
+        .leave { color: #ffc107; }
+        .not-marked { color: #6c757d; }
+        .attendance-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .table-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .student-row {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s;
+        }
+        .student-row:hover {
+            background: #f8f9fa;
+        }
+        .student-row:last-child {
+            border-bottom: none;
+        }
+        .student-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+        }
+        .student-details h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 1.1em;
+        }
+        .student-details small {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .attendance-controls {
+            display: flex;
+            gap: 12px;
+        }
+        .status-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .status-btn:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transition: all 0.3s;
+            transform: translate(-50%, -50%);
+        }
+        .status-btn:hover:before {
+            width: 100px;
+            height: 100px;
+        }
+        .status-btn.present { 
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+        .status-btn.absent { 
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        .status-btn.leave { 
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: black;
+        }
+        .status-btn.active { 
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .bulk-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .bulk-btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .bulk-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        .save-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            font-size: 18px;
+            padding: 18px 35px;
+        }
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="attendance-container">
+        <div class="header">
+            <h1>📋 Mark Attendance</h1>
+            <p>Track student presence for {{ selected_date }}</p>
+        </div>
+        
+        <div class="date-selector">
+            <form method="GET">
+                <label for="date">📅 Select Date:</label>
+                <input type="date" id="date" name="date" value="{{ selected_date }}" max="{{ current_date }}">
+                <button type="submit">Load Attendance</button>
+            </form>
+            <a href="{{ url_for('attendance.view_attendance') }}" style="text-decoration: none;">
+                <button type="button" style="background: #6c757d; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer;">📊 View Records</button>
+            </a>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-number present" id="present-count">0</div>
+                <div class="stat-label">Present</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number absent" id="absent-count">0</div>
+                <div class="stat-label">Absent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number leave" id="leave-count">0</div>
+                <div class="stat-label">On Leave</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number not-marked" id="not-marked-count">{{ tenants|length }}</div>
+                <div class="stat-label">Not Marked</div>
+            </div>
+        </div>
+
+        <div class="bulk-actions">
+            <button class="bulk-btn" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;" onclick="markAllAs('Present')">✅ Mark All Present</button>
+            <button class="bulk-btn" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white;" onclick="markAllAs('Absent')">❌ Mark All Absent</button>
+            <button class="bulk-btn save-btn" onclick="saveAttendance()">💾 Save Attendance</button>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="attendance-table">
+            <div class="table-header">
+                <h3>👥 Students ({{ tenants|length }} total)</h3>
+                <span id="marked-progress">0 / {{ tenants|length }} marked</span>
+            </div>
+            {% for tenant in tenants %}
+            <div class="student-row" data-student-id="{{ tenant.id }}">
+                <div class="student-info">
+                    <div class="student-avatar">{{ tenant.name[0].upper() }}</div>
+                    <div class="student-details">
+                        <h4>{{ tenant.name }}</h4>
+                        <small>ID: {{ tenant.id }} | Room: {{ tenant.room_number }} | Type: {{ tenant.type }}</small>
+                        {% if tenant.current_status != 'Not Marked' %}
+                        <small style="color: #28a745; font-weight: bold;"> | Current: {{ tenant.current_status }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="attendance-controls">
+                    <button class="status-btn present {% if tenant.current_status == 'Present' %}active{% endif %}" 
+                            onclick="setStatus({{ tenant.id }}, 'Present', this)">✅ Present</button>
+                    <button class="status-btn absent {% if tenant.current_status == 'Absent' %}active{% endif %}" 
+                            onclick="setStatus({{ tenant.id }}, 'Absent', this)">❌ Absent</button>
+                    <button class="status-btn leave {% if tenant.current_status == 'Leave' %}active{% endif %}" 
+                            onclick="setStatus({{ tenant.id }}, 'Leave', this)">🏖️ Leave</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        let attendanceData = {};
+        const totalStudents = {{ tenants|length }};
+
+        function updateStats() {
+            const counts = {
+                Present: 0,
+                Absent: 0,
+                Leave: 0
+            };
+
+            Object.values(attendanceData).forEach(status => {
+                if (counts.hasOwnProperty(status)) {
+                    counts[status]++;
+                }
+            });
+
+            const notMarked = totalStudents - Object.keys(attendanceData).length;
+
+            document.getElementById('present-count').textContent = counts.Present;
+            document.getElementById('absent-count').textContent = counts.Absent;
+            document.getElementById('leave-count').textContent = counts.Leave;
+            document.getElementById('not-marked-count').textContent = notMarked;
+
+            const markedCount = Object.keys(attendanceData).length;
+            document.getElementById('marked-progress').textContent = `${markedCount} / ${totalStudents} marked`;
+            
+            const progressPercent = (markedCount / totalStudents) * 100;
+            document.getElementById('progress-fill').style.width = progressPercent + '%';
+        }
+
+        function setStatus(studentId, status, button) {
+            // Remove active class from all buttons in this row
+            const row = button.closest('.student-row');
+            row.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Store the status
+            attendanceData[studentId] = status;
+            
+            // Update stats
+            updateStats();
+            
+            // Add visual feedback
+            button.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 200);
+        }
+
+        function markAllAs(status) {
+            document.querySelectorAll('.student-row').forEach(row => {
+                const studentId = row.dataset.studentId;
+                const button = row.querySelector(`.status-btn.${status.toLowerCase()}`);
+                setStatus(studentId, status, button);
+            });
+        }
+
+        function saveAttendance() {
+            const date = document.getElementById('date').value;
+            
+            if (Object.keys(attendanceData).length === 0) {
+                alert('⚠️ Please mark attendance for at least one student');
+                return;
+            }
+
+            // Show loading state
+            const saveBtn = document.querySelector('.save-btn');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '⏳ Saving...';
+            saveBtn.disabled = true;
+
+            const payload = {
+                date: date,
+                attendance: Object.entries(attendanceData).map(([tenant_id, status]) => ({
+                    tenant_id: tenant_id,
+                    status: status
+                }))
+            };
+
+            fetch('{{ url_for("attendance.mark_attendance") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    saveBtn.innerHTML = '✅ Saved Successfully!';
+                    saveBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    alert('✅ ' + data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error('Save failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                saveBtn.innerHTML = '❌ Error - Try Again';
+                saveBtn.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+                saveBtn.disabled = false;
+                alert('❌ Error saving attendance. Please try again.');
+                
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                }, 3000);
+            });
+        }
+
+        // Initialize existing attendance
+        {% for tenant in tenants %}
+        {% if tenant.current_status != 'Not Marked' %}
+        attendanceData[{{ tenant.id }}] = '{{ tenant.current_status }}';
+        {% endif %}
+        {% endfor %}
+
+        // Initial stats update
+        updateStats();
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveAttendance();
+            }
+        });
+    </script>
+</body>
+</html>

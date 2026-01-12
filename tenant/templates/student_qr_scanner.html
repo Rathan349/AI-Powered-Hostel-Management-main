@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Scanner</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .scanner-header {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .scanner-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .scanner-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .camera-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .camera-container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 2rem;
+      border-radius: 15px;
+      overflow: hidden;
+      background: #f8f9fa;
+      border: 3px dashed #dc3545;
+    }
+
+    .camera-video {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .camera-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      border: 3px solid #dc3545;
+      border-radius: 15px;
+      pointer-events: none;
+    }
+
+    .camera-overlay::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      border: 2px solid rgba(220, 53, 69, 0.3);
+      border-radius: 15px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    .scanner-area {
+      border: 3px dashed #dc3545;
+      border-radius: 15px;
+      padding: 3rem;
+      text-align: center;
+      background: #f8f9fa;
+      margin-bottom: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .scanner-area.active {
+      border-color: #28a745;
+      background: #e8f5e9;
+    }
+
+    .scanner-icon {
+      font-size: 4rem;
+      color: #dc3545;
+      margin-bottom: 1rem;
+    }
+
+    .scanner-area.active .scanner-icon {
+      color: #28a745;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .upload-btn, .camera-btn {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 0.5rem;
+    }
+
+    .camera-btn {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+
+    .upload-btn:hover, .camera-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(220,53,69,0.4);
+    }
+
+    .camera-btn:hover {
+      box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+    }
+
+    .manual-input {
+      margin-top: 2rem;
+    }
+
+    .manual-textarea {
+      width: 100%;
+      min-height: 150px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .manual-textarea:focus {
+      border-color: #dc3545;
+      outline: none;
+    }
+
+    .scan-btn {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .scan-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40,167,69,0.4);
+    }
+
+    .results-section {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .result-card {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 5px solid #28a745;
+    }
+
+    .result-card.invalid {
+      border-left-color: #dc3545;
+      background: #fff5f5;
+    }
+
+    .result-card.expired {
+      border-left-color: #ffc107;
+      background: #fffbf0;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .result-type {
+      font-weight: 600;
+      color: #1d3557;
+      font-size: 1.1rem;
+    }
+
+    .result-status {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-valid {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-invalid {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-expired {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .result-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .scanner-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .result-details {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>{{student_data.name if student_data else 'Student'}}</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_qr.my_documents')}}">📱 Digital Documents</a>
+        <a href="{{url_for('t_qr.digital_id')}}">🆔 Digital ID</a>
+        <a href="{{url_for('t_qr.leave_request')}}">✈️ Leave Request</a>
+        <a href="{{url_for('t_qr.visitor_invite')}}">👥 Visitor Invite</a>
+        <a href="{{url_for('t_qr.qr_scanner')}}" class="active">📷 QR Scanner</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container">
+        <!-- Header -->
+        <div class="scanner-header">
+          <h1 class="mb-3">📷 QR Code Scanner</h1>
+          <p class="mb-0">Scan QR codes to verify student IDs, visitor passes, and leave permits</p>
+        </div>
+
+        <!-- Scanner Container -->
+        <div class="scanner-container">
+          <!-- Camera Scanner Section -->
+          <div class="camera-section">
+            <h3 class="mb-4">📱 Camera Scanner</h3>
+            
+            <div class="camera-container">
+              <video id="cameraVideo" class="camera-video" autoplay muted></video>
+              <div class="camera-overlay"></div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-2 mb-3">
+              <button class="camera-btn" id="startCameraBtn" onclick="startCamera()">
+                <i class="fas fa-camera"></i>
+                Start Camera
+              </button>
+              <button class="camera-btn" id="stopCameraBtn" onclick="stopCamera()" style="display: none;">
+                <i class="fas fa-stop"></i>
+                Stop Camera
+              </button>
+            </div>
+
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle"></i>
+              <strong>How to use:</strong> Click "Start Camera" and point your camera at a QR code. The scanner will automatically detect and verify the code.
+            </div>
+          </div>
+
+          <!-- File Upload Scanner Section -->
+          <div class="scanner-section">
+            <h3 class="mb-4">📁 Upload Scanner</h3>
+            
+            <div class="scanner-area" id="scannerArea">
+              <div class="scanner-icon">
+                <i class="fas fa-qrcode"></i>
+              </div>
+              <h4>Upload QR Code Image</h4>
+              <p class="text-muted">Click to upload or drag & drop a QR code image</p>
+              <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-upload"></i>
+                Choose File
+              </button>
+              <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+
+            <div class="manual-input">
+              <h5>📝 Or Enter QR Data Manually</h5>
+              <textarea 
+                class="manual-textarea" 
+                id="manualInput" 
+                placeholder="Paste QR code data here..."></textarea>
+              <button class="scan-btn" onclick="scanManualInput()">
+                <i class="fas fa-search"></i>
+                Verify QR Data
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+          <h3 class="mb-4">📊 Scan Results</h3>
+          
+          <div id="scanResults">
+            <div class="text-center py-5">
+              <i class="fas fa-search" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+              <h4>No Scans Yet</h4>
+              <p class="text-muted">Use the camera or upload a QR code image to see verification results.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Include QR Code Scanner Library -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+  <script>
+    let video = null;
+    let canvas = null;
+    let context = null;
+    let scanning = false;
+
+    // Initialize canvas for QR scanning
+    function initCanvas() {
+      canvas = document.createElement('canvas');
+      context = canvas.getContext('2d');
+    }
+
+    // Start camera for QR scanning
+    async function startCamera() {
+      try {
+        video = document.getElementById('cameraVideo');
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' } // Use back camera if available
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        
+        document.getElementById('startCameraBtn').style.display = 'none';
+        document.getElementById('stopCameraBtn').style.display = 'inline-block';
+        
+        scanning = true;
+        initCanvas();
+        scanFromCamera();
+        
+      } catch (error) {
+        alert('Camera access denied or not available: ' + error.message);
+      }
+    }
+
+    // Stop camera
+    function stopCamera() {
+      if (video && video.srcObject) {
+        const tracks = video.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+        video.srcObject = null;
+      }
+      
+      scanning = false;
+      document.getElementById('startCameraBtn').style.display = 'inline-block';
+      document.getElementById('stopCameraBtn').style.display = 'none';
+    }
+
+    // Scan QR code from camera feed
+    function scanFromCamera() {
+      if (!scanning || !video) return;
+      
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.height = video.videoHeight;
+        canvas.width = video.videoWidth;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+          console.log('QR Code detected:', code.data);
+          verifyQRCode(code.data);
+          stopCamera(); // Stop scanning after successful detection
+        }
+      }
+      
+      if (scanning) {
+        requestAnimationFrame(scanFromCamera);
+      }
+    }
+
+    // File input handler
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+            // Create canvas to process image
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0);
+            
+            // Try to read QR code from image
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            
+            if (code) {
+              verifyQRCode(code.data);
+            } else {
+              showScanResult({
+                valid: false,
+                error: 'No QR code found in the image'
+              });
+            }
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Drag and drop functionality
+    const scannerArea = document.getElementById('scannerArea');
+    
+    scannerArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      scannerArea.classList.add('active');
+    });
+
+    scannerArea.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      scannerArea.classList.remove('active');
+    });
+
+    scannerArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      scannerArea.classList.remove('active');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        document.getElementById('fileInput').files = files;
+        document.getElementById('fileInput').dispatchEvent(new Event('change'));
+      }
+    });
+
+    function scanManualInput() {
+      const input = document.getElementById('manualInput').value.trim();
+      if (!input) {
+        alert('Please enter QR code data');
+        return;
+      }
+
+      verifyQRCode(input);
+    }
+
+    async function verifyQRCode(qrData) {
+      try {
+        // Show loading
+        showScanResult({
+          loading: true
+        });
+
+        const response = await fetch('/student_qr/verify_qr', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ qr_data: qrData })
+        });
+
+        const result = await response.json();
+        showScanResult(result);
+      } catch (error) {
+        showScanResult({
+          valid: false,
+          error: 'Failed to verify QR code: ' + error.message
+        });
+      }
+    }
+
+    function showScanResult(result) {
+      const resultsContainer = document.getElementById('scanResults');
+      
+      if (result.loading) {
+        resultsContainer.innerHTML = `
+          <div class="text-center py-5">
+            <i class="fas fa-spinner fa-spin" style="font-size: 4rem; color: #007bff; margin-bottom: 1rem;"></i>
+            <h4>Verifying QR Code...</h4>
+            <p class="text-muted">Please wait while we verify the QR code.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      if (result.valid && result.data) {
+        const data = result.data;
+        const isExpired = data.valid_until && new Date(data.valid_until) < new Date();
+        
+        resultsContainer.innerHTML = `
+          <div class="result-card ${isExpired ? 'expired' : ''}">
+            <div class="result-header">
+              <div class="result-type">${getQRTypeDisplay(data.type)}</div>
+              <span class="result-status status-${isExpired ? 'expired' : 'valid'}">
+                ${isExpired ? 'Expired' : 'Valid'}
+              </span>
+            </div>
+            
+            <div class="result-details">
+              ${generateResultDetails(data)}
+            </div>
+            
+            ${isExpired ? '<div class="alert alert-warning mt-3">⚠️ This QR code has expired!</div>' : ''}
+            ${!isExpired ? '<div class="alert alert-success mt-3">✅ QR code is valid and verified!</div>' : ''}
+          </div>
+        `;
+      } else {
+        resultsContainer.innerHTML = `
+          <div class="result-card invalid">
+            <div class="result-header">
+              <div class="result-type">Invalid QR Code</div>
+              <span class="result-status status-invalid">Invalid</span>
+            </div>
+            <div class="alert alert-danger mt-3">
+              ❌ ${result.error || 'QR code verification failed'}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function getQRTypeDisplay(type) {
+      const types = {
+        'STUDENT_ID': '🆔 Student Digital ID',
+        'VISITOR_ENTRY': '👥 Visitor Entry Pass',
+        'LEAVE_PASS': '✈️ Digital Leave Pass'
+      };
+      return types[type] || '❓ Unknown QR Type';
+    }
+
+    function generateResultDetails(data) {
+      let details = '';
+      
+      if (data.type === 'STUDENT_ID') {
+        details = `
+          <div class="detail-item">
+            <i class="fas fa-user"></i>
+            <span>Name: ${data.name}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-id-badge"></i>
+            <span>ID: ${data.student_id}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-home"></i>
+            <span>Room: ${data.room}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-phone"></i>
+            <span>Phone: ${data.phone || 'N/A'}</span>
+          </div>
+        `;
+      } else if (data.type === 'VISITOR_ENTRY') {
+        details = `
+          <div class="detail-item">
+            <i class="fas fa-user"></i>
+            <span>Visitor: ${data.name}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-id-badge"></i>
+            <span>ID: ${data.visitor_id}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-user-friends"></i>
+            <span>Visiting: ${data.visiting_student}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-home"></i>
+            <span>Room: ${data.visiting_room}</span>
+          </div>
+        `;
+      } else if (data.type === 'LEAVE_PASS') {
+        details = `
+          <div class="detail-item">
+            <i class="fas fa-user"></i>
+            <span>Student: ${data.student_name}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-ticket-alt"></i>
+            <span>Pass ID: ${data.pass_id}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Destination: ${data.destination}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-tag"></i>
+            <span>Purpose: ${data.purpose}</span>
+          </div>
+        `;
+      }
+      
+      if (data.valid_until) {
+        details += `
+          <div class="detail-item">
+            <i class="fas fa-clock"></i>
+            <span>Valid Until: ${new Date(data.valid_until).toLocaleString()}</span>
+          </div>
+        `;
+      }
+      
+      return details;
+    }
+
+    // Clear manual input when file is selected
+    document.getElementById('fileInput').addEventListener('change', function() {
+      document.getElementById('manualInput').value = '';
+    });
+
+    // Clear file input when manual input is used
+    document.getElementById('manualInput').addEventListener('input', function() {
+      document.getElementById('fileInput').value = '';
+    });
+
+    // Clean up camera when page is closed
+    window.addEventListener('beforeunload', function() {
+      stopCamera();
+    });
+  </script>
+</body>
+</html>

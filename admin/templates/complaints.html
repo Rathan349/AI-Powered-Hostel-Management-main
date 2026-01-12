@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced Complaints Management</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .stat-card h3 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .stat-card p {
+      margin: 0.5rem 0 0 0;
+      opacity: 0.9;
+    }
+
+    .filters-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .complaint-card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-left: 5px solid #ddd;
+      transition: all 0.3s ease;
+    }
+
+    .complaint-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .complaint-card.priority-high {
+      border-left-color: #dc3545;
+    }
+
+    .complaint-card.priority-medium {
+      border-left-color: #ffc107;
+    }
+
+    .complaint-card.priority-low {
+      border-left-color: #28a745;
+    }
+
+    .complaint-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .complaint-id {
+      font-weight: bold;
+      color: #1d3557;
+      font-size: 1.1rem;
+    }
+
+    .priority-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .priority-high {
+      background: #dc3545;
+      color: white;
+    }
+
+    .priority-medium {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .priority-low {
+      background: #28a745;
+      color: white;
+    }
+
+    .status-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .status-resolved {
+      background: #d1edff;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .complaint-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .complaint-description {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      border-left: 3px solid #007bff;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-resolve {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-resolve:hover {
+      background: #218838;
+      transform: translateY(-1px);
+    }
+
+    .btn-view {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-view:hover {
+      background: #0056b3;
+    }
+
+    .btn-contact {
+      background: #6f42c1;
+      color: white;
+    }
+
+    .btn-contact:hover {
+      background: #5a32a3;
+    }
+
+    .search-filter {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 0.75rem;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .filter-select {
+      padding: 0.75rem;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .no-complaints {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    .no-complaints-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .pagination button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .pagination button:hover {
+      background: #0056b3;
+      transform: translateY(-1px);
+    }
+
+    .pagination button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @media (max-width: 768px) {
+      .complaint-details {
+        grid-template-columns: 1fr;
+      }
+      
+      .search-filter {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-input {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}" class="active">🛠️ Complaints</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <div>
+          <h1>🛠️ Enhanced Complaints Management</h1>
+          <p class="text-muted">Monitor and resolve student complaints efficiently</p>
+        </div>
+        <button class="btn btn-primary" onclick="refreshComplaints()">
+          🔄 Refresh
+        </button>
+      </header>
+
+      <!-- Statistics Cards -->
+      <div class="stats-cards">
+        <div class="stat-card">
+          <h3 id="totalComplaints">{{data|length}}</h3>
+          <p>Total Complaints</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="pendingComplaints">{{data|selectattr('5', 'equalto', 'Pending')|list|length}}</h3>
+          <p>Pending</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="resolvedComplaints">{{data|selectattr('5', 'equalto', 'Resolved')|list|length}}</h3>
+          <p>Resolved</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="highPriorityComplaints">{{data|selectattr('4', 'equalto', 'High')|list|length}}</h3>
+          <p>High Priority</p>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <h5 class="mb-3">🔍 Search & Filter</h5>
+        <div class="search-filter">
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by student name, room, or description...">
+          <select class="filter-select" id="statusFilter">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Resolved">Resolved</option>
+          </select>
+          <select class="filter-select" id="priorityFilter">
+            <option value="">All Priority</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+          </select>
+          <button class="btn btn-outline-secondary" onclick="clearFilters()">Clear Filters</button>
+        </div>
+      </div>
+
+      <!-- Complaints List -->
+      <section class="complaints-list" id="complaintsContainer">
+        {% if data %}
+          {% for row in data %}
+          <div class="complaint-card priority-{{row[4].lower()}}" data-status="{{row[5]}}" data-priority="{{row[4]}}" data-student="{{row[1]}}" data-room="{{row[2]}}" data-description="{{row[3]}}">
+            <div class="complaint-header">
+              <div class="complaint-id">📋 Complaint #{{row[0]}}</div>
+              <div class="d-flex gap-2">
+                <span class="priority-badge priority-{{row[4].lower()}}">{{row[4]}} Priority</span>
+                <span class="status-badge status-{{row[5].lower()}}">{{row[5]}}</span>
+              </div>
+            </div>
+            
+            <div class="complaint-details">
+              <div class="detail-item">
+                <span class="detail-label">👤 Student:</span>
+                <span>{{row[1]}}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">🏠 Room:</span>
+                <span>{{row[2]}}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">📅 Date:</span>
+                <span>{{row[6] if row|length > 6 else 'N/A'}}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">🏷️ Type:</span>
+                <span>{{row[7] if row|length > 7 else 'General'}}</span>
+              </div>
+            </div>
+
+            <div class="complaint-description">
+              <strong>📝 Description:</strong><br>
+              {{row[3]}}
+            </div>
+
+            <div class="action-buttons">
+              {% if row[5] == 'Pending' %}
+              <form method="POST" action="{{ url_for('complaint.mark_complaint_solved') }}" style="display: inline;">
+                <input type="hidden" name="complaint_id" value="{{ row[0] }}">
+                <button class="action-btn btn-resolve" type="submit" onclick="return confirm('Mark this complaint as resolved?')">
+                  ✅ Mark Resolved
+                </button>
+              </form>
+              {% endif %}
+              <button class="action-btn btn-view" onclick="viewComplaintDetails('{{row[0]}}')">
+                👁️ View Details
+              </button>
+              <button class="action-btn btn-contact" onclick="contactStudent('{{row[1]}}', '{{row[2]}}')">
+                📞 Contact Student
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="no-complaints">
+            <div class="no-complaints-icon">📭</div>
+            <h3>No Complaints Found</h3>
+            <p>All students are happy! No complaints have been submitted yet.</p>
+          </div>
+        {% endif %}
+      </section>
+
+      <div class="pagination">
+        {% if page > 1 %}
+        <a href="{{url_for('dashboard.manage_complaints', page = page - 1)}}">
+          <button id="prevBtn">⏪ Previous</button>
+        </a>
+        {% endif %}
+
+        {% if total_pages == 0 %}
+        {% set total_pages = 1 %}
+        {% endif %}
+
+        <span id="pageInfo">Page {{page}} of {{total_pages}}</span>
+
+        {% if page < total_pages %} <a href="{{url_for('dashboard.manage_complaints', page = page + 1)}}">
+          <button id="nextBtn">Next ⏩</button>
+          </a>
+          {% endif %}
+      </div>
+
+      <footer class="footer">
+        <p>&copy; 2025 AI Powered Hostel Manager. All rights reserved.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Search and filter functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchInput');
+      const statusFilter = document.getElementById('statusFilter');
+      const priorityFilter = document.getElementById('priorityFilter');
+      const complaintsContainer = document.getElementById('complaintsContainer');
+
+      function filterComplaints() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        const priorityValue = priorityFilter.value;
+        const complaints = complaintsContainer.querySelectorAll('.complaint-card');
+
+        let visibleCount = 0;
+
+        complaints.forEach(complaint => {
+          const student = complaint.dataset.student.toLowerCase();
+          const room = complaint.dataset.room.toLowerCase();
+          const description = complaint.dataset.description.toLowerCase();
+          const status = complaint.dataset.status;
+          const priority = complaint.dataset.priority;
+
+          const matchesSearch = !searchTerm || 
+            student.includes(searchTerm) || 
+            room.includes(searchTerm) || 
+            description.includes(searchTerm);
+          
+          const matchesStatus = !statusValue || status === statusValue;
+          const matchesPriority = !priorityValue || priority === priorityValue;
+
+          if (matchesSearch && matchesStatus && matchesPriority) {
+            complaint.style.display = 'block';
+            visibleCount++;
+          } else {
+            complaint.style.display = 'none';
+          }
+        });
+
+        // Show no results message if needed
+        updateNoResultsMessage(visibleCount);
+      }
+
+      function updateNoResultsMessage(count) {
+        let noResultsMsg = document.getElementById('noResultsMessage');
+        
+        if (count === 0 && document.querySelectorAll('.complaint-card').length > 0) {
+          if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.id = 'noResultsMessage';
+            noResultsMsg.className = 'no-complaints';
+            noResultsMsg.innerHTML = `
+              <div class="no-complaints-icon">🔍</div>
+              <h3>No Matching Complaints</h3>
+              <p>Try adjusting your search criteria or filters.</p>
+            `;
+            complaintsContainer.appendChild(noResultsMsg);
+          }
+          noResultsMsg.style.display = 'block';
+        } else if (noResultsMsg) {
+          noResultsMsg.style.display = 'none';
+        }
+      }
+
+      // Event listeners
+      searchInput.addEventListener('input', filterComplaints);
+      statusFilter.addEventListener('change', filterComplaints);
+      priorityFilter.addEventListener('change', filterComplaints);
+    });
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('priorityFilter').value = '';
+      
+      // Show all complaints
+      document.querySelectorAll('.complaint-card').forEach(complaint => {
+        complaint.style.display = 'block';
+      });
+      
+      // Hide no results message
+      const noResultsMsg = document.getElementById('noResultsMessage');
+      if (noResultsMsg) {
+        noResultsMsg.style.display = 'none';
+      }
+    }
+
+    function refreshComplaints() {
+      window.location.reload();
+    }
+
+    function viewComplaintDetails(complaintId) {
+      // Create modal or redirect to detailed view
+      alert(`Viewing details for complaint #${complaintId}\n\nThis would open a detailed view with:\n• Full complaint history\n• Student contact info\n• Resolution timeline\n• Admin notes`);
+    }
+
+    function contactStudent(studentName, roomNumber) {
+      // Redirect to messaging system or show contact options
+      if (confirm(`Contact ${studentName} in Room ${roomNumber}?`)) {
+        // This would integrate with your messaging system
+        window.location.href = '/messages/compose?student=' + encodeURIComponent(studentName);
+      }
+    }
+
+    // Auto-refresh every 30 seconds for real-time updates
+    setInterval(() => {
+      // In a real application, you'd use AJAX to update the complaints
+      console.log('Auto-refreshing complaints...');
+    }, 30000);
+
+    // Add smooth animations
+    document.querySelectorAll('.complaint-card').forEach((card, index) => {
+      card.style.animationDelay = `${index * 0.1}s`;
+      card.style.animation = 'slideInUp 0.5s ease forwards';
+    });
+
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script></body>
+
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compose Message</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <style>
+    .compose-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .compose-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    .compose-header h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    .compose-form {
+      padding: 30px;
+    }
+    .form-group {
+      margin-bottom: 25px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+      font-size: 1.1em;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    .recipient-info {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(40,167,69,0.3);
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+    .character-count {
+      text-align: right;
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 5px;
+    }
+    .message-tips {
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 0 8px 8px 0;
+    }
+    .message-tips h4 {
+      margin: 0 0 10px 0;
+      color: #007bff;
+    }
+    .message-tips ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .message-tips li {
+      margin-bottom: 5px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>Student Portal</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_dashboard.profile_page')}}">Profile</a>
+        <a href="{{url_for('t_dashboard.room_page')}}">Room Info</a>
+        <a href="{{url_for('t_dashboard.mess_page')}}">Mess</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}">Complaints</a>
+        <a href="{{url_for('t_message.inbox')}}" class="active">Messages</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container-fluid">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% set category, message = messages[-1] %}
+            <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+              {{message}}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="compose-container">
+          <div class="compose-header">
+            <h1>✉️ Message Admin</h1>
+            <p>Send a message to the hostel administration</p>
+          </div>
+
+          <form method="POST" class="compose-form">
+            <div class="recipient-info">
+              <h3>📤 Sending to: Hostel Administrator</h3>
+              <p>Your message will be delivered to the admin team</p>
+            </div>
+
+            <div class="message-tips">
+              <h4>💡 Message Tips</h4>
+              <ul>
+                <li>Be clear and specific about your request or concern</li>
+                <li>Include relevant details (room number, dates, etc.)</li>
+                <li>Use a descriptive subject line</li>
+                <li>Be polite and professional</li>
+              </ul>
+            </div>
+
+            <div class="form-group">
+              <label for="subject">📝 Subject</label>
+              <input type="text" id="subject" name="subject" required 
+                     placeholder="e.g., Room maintenance request, Fee inquiry, etc."
+                     maxlength="100">
+              <div class="character-count">
+                <span id="subject-count">0</span>/100 characters
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="message">💬 Message</label>
+              <textarea id="message" name="message" rows="8" required 
+                        placeholder="Please describe your request, concern, or question in detail..."
+                        maxlength="1000"></textarea>
+              <div class="character-count">
+                <span id="message-count">0</span>/1000 characters
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button type="submit" class="btn btn-primary">📨 Send Message</button>
+              <a href="{{url_for('t_message.inbox')}}" class="btn btn-secondary">❌ Cancel</a>
+            </div>
+          </form>
+        </div>
+
+        <script>
+          // Character counters
+          document.getElementById('subject').addEventListener('input', function() {
+            document.getElementById('subject-count').textContent = this.value.length;
+          });
+
+          document.getElementById('message').addEventListener('input', function() {
+            document.getElementById('message-count').textContent = this.value.length;
+          });
+        </script>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

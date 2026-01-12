@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hostel Manager Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}" class="active">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}">💰 Fees</a>
+        <a href="{{url_for('message.whatsapp_chat')}}">💬 Chat</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Welcome Back!</h1>
+        <p>Here’s what’s happening in your hostel today.</p>
+      </header>
+
+      <section class="dashboard-stats">
+        <div class="stat-card">
+          <h3>Total Students</h3>
+          <p id="studentCount">{{tenant_count}}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Occupied Rooms</h3>
+          <p id="roomCount">{{occupied_rooms}}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Pending Complaints</h3>
+          <p id="complaintCount">{{com_count}}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Today's Mess Count</h3>
+          <p id="messCount">{{mess_count}}</p>
+        </div>
+      </section>
+
+      <section class="quick-links">
+        <h2>Quick Access</h2>
+        <div class="card-container">
+          <div class="card">
+            <h3>👤 Add New Student</h3>
+            <p>Enroll a new Student and assign room.</p>
+            <a href="{{url_for('tenant.register_tenant')}}" class="btn">Go</a>
+          </div>
+          <div class="card">
+            <h3>🛏️ Manage Rooms</h3>
+            <p>View room status and assign rooms.</p>
+            <a href="{{url_for('dashboard.manage_rooms')}}" class="btn">Go</a>
+          </div>
+          <div class="card">
+            <h3>🍽️ Mess Schedule</h3>
+            <p>Track meals and attendance of students.</p>
+            <a href="{{url_for('dashboard.manage_mess')}}" class="btn">Go</a>
+          </div>
+          <div class="card">
+            <h3>🛠️ View Complaints</h3>
+            <p>Monitor and resolve complaints.</p>
+            <a href="{{url_for('dashboard.manage_complaints')}}" class="btn">Go</a>
+          </div>
+          <div class="card">
+            <h3>📊 Attendance</h3>
+            <p>Track student attendance records.</p>
+            <a href="{{url_for('attendance.view_attendance')}}" class="btn">Go</a>
+          </div>
+          <div class="card">
+            <h3>💰 Fee Management</h3>
+            <p>Manage student fee payments.</p>
+            <a href="{{url_for('fee.view_fees')}}" class="btn">Go</a>
+          </div>
+          <div class="card">
+            <h3>💬 WhatsApp Chat</h3>
+            <p>Chat with students in real-time.</p>
+            <a href="{{url_for('message.whatsapp_chat')}}" class="btn" style="background: #25d366;">💬 Start Chat</a>
+          </div>
+          <div class="card">
+            <h3>📱 Digital Documents</h3>
+            <p>QR codes for IDs, visitors, and leave passes.</p>
+            <a href="{{url_for('qr.digital_documents')}}" class="btn" style="background: #667eea;">📱 Manage QR</a>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>&copy; 2025 AI Powered Hostel Manager. All rights reserved.</p>
+      </footer>
+    </main>
+  </div>
+
+
+
+  <script src="js/api.js"></script>
+  <script>
+  </script></body>
+
+</html>

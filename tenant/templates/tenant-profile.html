@@ -1,0 +1,94 @@
+<!-- File: student-profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Tenanr Profile</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>{{Tenant_Name}}</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_dashboard.profile_page')}}" class="active">My Profile</a>
+        <a href="{{url_for('t_dashboard.room_page')}}">Room Info</a>
+        <a href="{{url_for('t_dashboard.mess_page')}}">Mess</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}">Complaints</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container">
+        <h1 class="mb-4">👤 My Profile</h1>
+
+        <div class="card p-4 shadow-sm">
+          <form id="profileForm">
+            <div class="mb-3">
+              <label for="studentId" class="form-label">Student ID</label>
+              <input type="text" class="form-control" id="studentId" value="{{data["id"]}}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label for="name" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="name" value="{{data["name"]}}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label for="contact" class="form-label">Contact</label>
+              <input type="text" class="form-control" id="contact" value="{{data["phone"]}}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" value="{{data["email"]}}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label for="address" class="form-label">Room</label>
+              <textarea class="form-control" id="address" rows="2" readonly>{{data["room"]}}</textarea>
+            </div>
+
+            <a href="{{url_for('t_dashboard.fullprofile_page')}}" class="btn custom-btn mt-3" style="color: white;">
+              View Complete Profile
+            </a>
+
+            <style>
+              .custom-btn {
+                background-color: #198754;
+                color: #fff;
+                font-weight: 600;
+                padding: 10px 20px;
+                border-radius: 8px;
+                text-decoration: none;
+                transition: background-color 0.3s ease;
+              }
+
+              .custom-btn:hover {
+                background-color: #1D3557;
+                color: white;
+              }
+            </style>
+
+
+
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+
+  </script>
+</body>
+
+</html>

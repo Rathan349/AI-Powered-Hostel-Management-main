@@ -1,0 +1,178 @@
+/* Updated: student.css with admin-style structure and original student color palette */
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f1f1f1;
+  color: #1d1d1d;
+}
+
+.student-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.student-sidebar {
+  width: 240px;
+  background-color: #2A9D8F;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.student-sidebar h2 {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.student-sidebar nav {
+  width: 100%;
+}
+
+.student-sidebar nav a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
+}
+
+.student-sidebar nav a:hover,
+.student-sidebar nav a.active {
+  background-color: #21867a;
+}
+
+.student-main {
+  flex-grow: 1;
+  padding: 2rem;
+  background-color: #ffffff;
+}
+
+.center-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f1f1f1;
+}
+
+.login-card {
+  background: #fff;
+  padding: 2rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+  width: 100%;
+}
+
+.login-card h2 {
+  color: #2A9D8F;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.login-card p {
+  text-align: center;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.login-card label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  display: block;
+  font-size: 0.95rem;
+}
+
+.login-card input,
+.login-card select,
+.login-card textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  background-color: #2A9D8F;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #1f7c75;
+}
+
+.info-box {
+  background: #f8f8f8;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 2rem;
+}
+
+.dashboard-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.card {
+  flex: 1;
+  min-width: 220px;
+  background-color: #f0fdfb;
+  border: 1px solid #d0ece7;
+  padding: 1rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.card a {
+  color: #2A9D8F;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.small-text {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  color: #666;
+}
+
+.form-message.error {
+  color: #c62828;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.form-message.success {
+  color: #2e7d32;
+  display: block;
+  margin-bottom: 10px;
+}

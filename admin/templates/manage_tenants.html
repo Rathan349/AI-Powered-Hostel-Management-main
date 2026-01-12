@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Students</title>
+    <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        .main-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .head-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .add-tenant-btn {
+            background-color: #2a9d8f;
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 1rem;
+            margin-left: auto;
+        }
+
+        .add-tenant-btn:hover {
+            background-color: #21867a;
+        }
+
+        .center-div {
+            margin-top: 0.5rem;
+        }
+
+        .center-div input,
+        .center-div select {
+            padding: 0.6rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .center-div table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            /* background-color: #bebebe;
+            border-radius: 8px; */
+        }
+
+        .center-div th {
+            background-color: #f1f3f5;
+            color: #333;
+        }
+
+        .center-div th,
+        td {
+            text-align: left;
+            padding: 0.5rem 1rem;
+        }
+
+        .action-btn {
+            background-color: #0077cc;
+            color: #fff;
+            padding: 0.4rem 0.8rem;
+            margin-right: 0.4rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .action-btn.edit {
+            background-color: #f4a261;
+        }
+
+        .action-btn.remove {
+            background-color: #e76f51;
+        }
+
+        .action-btn.view {
+            background-color: #1d3557;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .status {
+            font-weight: bold;
+            color: white;
+            background-color: #38b000;
+            padding: 0.4rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .pagination button {
+            background-color: #1d3557;
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #457b9d;
+        }
+
+        .center-div tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>🏨 AI Powered Hostel Manager</h2>
+            </div>
+            <nav class="nav-links">
+                <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+                <a href="{{url_for('dashboard.manage_tenants')}}" class="active">📝 Manage Student</a>
+                <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+                <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+                <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="head-container">
+                <header class="main-header">
+                    <h1>
+                        Student Management
+                    </h1>
+                </header>
+
+                <a href="{{url_for('tenant.register_tenant')}}">
+                    <button class="add-tenant-btn">📄Register New Student</button>
+                </a>
+                <a href="{{url_for('export.export_students_excel')}}">
+                    <button class="add-tenant-btn" style="background-color: #2a9d8f;">📥 Export to Excel</button>
+                </a>
+                <a href="{{url_for('export.export_students_csv')}}">
+                    <button class="add-tenant-btn" style="background-color: #457B9D;">📥 Export to CSV</button>
+                </a>
+
+            </div>
+
+            <div class="center-div">
+                <div class="search-filters">
+                    <input type="text" placeholder="Search Students" disabled>
+
+                    <select disabled>
+                        <option>All Types</option>
+                        <option>Student</option>
+                        <option>Employee</option>
+                        <option>Other</option>
+                    </select>
+
+                    <select disabled>
+                        <option>All Status</option>
+                        <option>Active</option>
+                        <option>Inactive</option>
+                    </select>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Room</th>
+                            <th>Type</th>
+                            <th>Enrollment Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data %}
+                        <tr>
+                            {% for col in row %}
+                            {% if not loop.last %}
+                            <td>{{col}}</td>
+                            {% endif %}
+                            {% endfor %}
+                            <td><span class="status">{{row[-1]}}</span></td>
+                            <td class="actions">
+                                <a href="{{url_for('tenant.view_tenants', ten_id=row[0])}}">
+                                    <button class="action-btn view" type="button">View</button>
+                                </a>
+                                <a href="{{ url_for('tenant.edit_tenant', ten_id=row[0]) }}">
+                                    <button class="action-btn edit" type="button">Edit</button>
+                                </a>
+                                <form action="{{ url_for('tenant.delete_tenant', tenant_id=row[0]) }}" method="post"
+                                    style="display: inline;">
+                                    <button type="submit" class="action-btn remove"
+                                        onclick="return confirm('Are you sure?')">Remove</button>
+                                </form>
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    {% if page > 1 %}
+                    <a href="{{url_for('dashboard.manage_tenants', page = page - 1)}}">
+                        <button id="prevBtn">⏪ Previous</button>
+                    </a>
+                    {% endif %}
+
+                    {% if total_pages == 0 %}
+                    {% set total_pages = 1 %}
+                    {% endif %}
+                    <span id="pageInfo">Page {{page}} of {{total_pages}}</span>
+
+                    {% if page < total_pages %} <a href="{{url_for('dashboard.manage_tenants', page = page + 1)}}">
+                        <button id="nextBtn">Next ⏩</button>
+                        </a>
+                        {% endif %}
+                </div>
+
+            </div>
+
+            <footer class="footer">
+                <p>&copy; 2025 Hostel Manager. All rights reserved.</p>
+            </footer>
+
+        </main>
+    </div></body>
+
+</html>

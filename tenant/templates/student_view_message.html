@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Message</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>Student Portal</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_dashboard.profile_page')}}">Profile</a>
+        <a href="{{url_for('t_dashboard.room_page')}}">Room Info</a>
+        <a href="{{url_for('t_dashboard.mess_page')}}">Mess</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}">Complaints</a>
+        <a href="{{url_for('t_message.inbox')}}" class="active">Messages</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+    <main class="student-main"></main>
+      <div class="container-fluid">
+        <h1 class="mb-3">📧 Message Details</h1>
+      <div class="form-card">
+        <p><strong>From:</strong> Admin</p>
+        <p><strong>Date:</strong> {{message.get('timestamp', 'N/A')[:16]}}</p>
+        <p><strong>Subject:</strong> {{message.get('subject')}}</p>
+        <hr>
+        <p style="white-space: pre-wrap;">{{message.get('message')}}</p>
+        <hr>
+        <a href="{{url_for('t_message.reply', message_id=message.get('message_id'))}}">
+          <button style="background-color: #2a9d8f;">Reply</button>
+        </a>
+        <form method="POST" action="{{url_for('t_message.delete', message_id=message.get('message_id'))}}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this message?');">
+          <button type="submit" style="background-color: #dc3545;">Delete</button>
+        </form>
+        <a href="{{url_for('t_message.inbox')}}">
+          <button style="background-color: #6c757d;">Back to Inbox</button>
+        </a>
+      </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

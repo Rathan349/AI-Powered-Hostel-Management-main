@@ -1,0 +1,101 @@
+<!-- File: portal.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Powered Hostel Manager - Choose Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2A9D8F, #264653);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      text-align: center;
+      color: #fff;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+    }
+
+    .portal-options {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background-color: #F1FAEE;
+      color: #1D3557;
+      width: 280px;
+      padding: 2rem 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+    }
+
+    .card h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .card p {
+      font-size: 1rem;
+      color: #444;
+    }
+
+    .card a {
+      display: inline-block;
+      margin-top: 1.5rem;
+      text-decoration: none;
+      color: white;
+      background-color: #457B9D;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+
+    .card a:hover {
+      background-color: #1D3557;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏨 AI Powered Hostel Manager Portal</h1>
+    <div class="portal-options">
+      <div class="card">
+        <h2>Admin Portal</h2>
+        <p>Manage hostel rooms, mess, students and complaints</p>
+        <a href="{{url_for('admin_portal')}}">Enter Admin</a>
+      </div>
+      <div class="card">
+        <h2>Student Portal</h2>
+        <p>View your room, mess status and submit complaints</p>
+        <a href="{{url_for('tenant_portal')}}">Enter Student</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

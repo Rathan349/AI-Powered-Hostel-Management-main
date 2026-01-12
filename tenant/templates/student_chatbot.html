@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <style>
+    .chatbot-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+    }
+    
+    .chat-header {
+      background: linear-gradient(135deg, #2a9d8f, #21867a);
+      color: white;
+      padding: 20px;
+      border-radius: 15px 15px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .chat-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+    
+    .bot-avatar {
+      width: 50px;
+      height: 50px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8em;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    
+    .message {
+      margin-bottom: 15px;
+      display: flex;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message.user {
+      justify-content: flex-end;
+    }
+    
+    .message.bot {
+      justify-content: flex-start;
+    }
+    
+    .message-bubble {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    
+    .message.user .message-bubble {
+      background: #2a9d8f;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message.bot .message-bubble {
+      background: white;
+      color: #333;
+      border: 1px solid #e0e0e0;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .message-time {
+      font-size: 0.7em;
+      color: #999;
+      margin-top: 5px;
+      text-align: right;
+    }
+    
+    .quick-actions {
+      padding: 15px 20px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .quick-btn {
+      padding: 8px 15px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: all 0.3s;
+    }
+    
+    .quick-btn:hover {
+      background: #2a9d8f;
+      color: white;
+      border-color: #2a9d8f;
+    }
+    
+    .chat-input-area {
+      padding: 20px;
+      background: white;
+      border-radius: 0 0 15px 15px;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    .chat-input-form {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 25px;
+      font-size: 1em;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    
+    .chat-input:focus {
+      border-color: #2a9d8f;
+    }
+    
+    .send-btn {
+      padding: 12px 25px;
+      background: #2a9d8f;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s;
+    }
+    
+    .send-btn:hover {
+      background: #21867a;
+    }
+    
+    .send-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .typing-indicator {
+      display: none;
+      padding: 10px 16px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 18px;
+      width: fit-content;
+    }
+    
+    .typing-indicator.show {
+      display: block;
+    }
+    
+    .typing-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #999;
+      margin: 0 2px;
+      animation: typing 1.4s infinite;
+    }
+    
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+    
+    .welcome-message {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+    
+    .welcome-message h3 {
+      color: #2a9d8f;
+      margin-bottom: 10px;
+    }
+
+    .suggestion-btn {
+      display: inline-block;
+      margin: 5px 5px 5px 0;
+      padding: 6px 12px;
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 15px;
+      color: #1976d2;
+      cursor: pointer;
+      font-size: 0.8em;
+      transition: all 0.3s;
+    }
+
+    .suggestion-btn:hover {
+      background: #2196f3;
+      color: white;
+    }
+
+    .smart-suggestions {
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-bubble strong {
+      color: #2a9d8f;
+    }
+
+    .message-bubble em {
+      color: #666;
+      font-style: italic;
+    }
+
+    /* Enhanced message styling */
+    .message.bot .message-bubble {
+      background: linear-gradient(135deg, #ffffff, #f8f9fa);
+      border-left: 4px solid #2a9d8f;
+    }
+
+    .urgent-message {
+      border-left: 4px solid #ff5722 !important;
+      background: linear-gradient(135deg, #fff3e0, #ffebee) !important;
+    }
+
+    .positive-message {
+      border-left: 4px solid #4caf50 !important;
+      background: linear-gradient(135deg, #f1f8e9, #e8f5e8) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>Student Portal</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_message.inbox')}}">Messages</a>
+        <a href="{{url_for('t_chatbot.chatbot_page')}}" class="active">🤖 AI Assistant</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="chatbot-container">
+        <div class="chat-header">
+          <div class="bot-avatar">🤖</div>
+          <div>
+            <h2>AI Hostel Assistant</h2>
+            <p style="margin: 0; font-size: 0.9em; opacity: 0.9;">Ask me anything about the hostel!</p>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="welcome-message">
+            <h3>🤖 Enhanced AI Hostel Assistant!</h3>
+            <p><strong>New AI Features:</strong></p>
+            <p>🧠 Smart responses • 🎯 Contextual help • 💡 Proactive suggestions<br>
+            ⏰ Time-based tips • 😊 Sentiment analysis • 📊 Personalized info</p>
+            <p><strong>I can help you with:</strong></p>
+            <p>🍽️ Mess services • 💰 Fee management • 📋 Smart complaints<br>
+            🏠 Room services • 🌐 WiFi & facilities • 📞 Contact support</p>
+            <p style="margin-top: 20px; color: #999;">Try the enhanced quick actions below or ask me anything!</p>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <button class="quick-btn" onclick="quickAction('mess_timing')">🍽️ Mess Timings</button>
+          <button class="quick-btn" onclick="quickAction('fee_status')">💰 Fee Status</button>
+          <button class="quick-btn" onclick="quickAction('submit_complaint')">📋 Submit Complaint</button>
+          <button class="quick-btn" onclick="quickAction('room_info')">🏠 My Room</button>
+          <button class="quick-btn" onclick="quickAction('contact_admin')">📞 Contact Admin</button>
+          <button class="quick-btn" onclick="askQuestion('WiFi password')">🌐 WiFi Help</button>
+          <button class="quick-btn" onclick="askQuestion('laundry timings')">👕 Laundry</button>
+          <button class="quick-btn" onclick="askQuestion('gym timings')">💪 Gym</button>
+        </div>
+        
+        <!-- Smart Suggestions Panel -->
+        <div class="smart-suggestions" id="smartSuggestions" style="display: none;">
+          <div style="padding: 15px 20px; background: #f8f9fa; border-top: 1px solid #e0e0e0;">
+            <h4 style="margin: 0 0 10px 0; color: #2a9d8f; font-size: 0.9em;">💡 Smart Suggestions</h4>
+            <div id="suggestionsList"></div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <form class="chat-input-form" id="chatForm">
+            <input 
+              type="text" 
+              class="chat-input" 
+              id="messageInput" 
+              placeholder="Type your message..."
+              autocomplete="off"
+              required
+            >
+            <button type="submit" class="send-btn" id="sendBtn">Send</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // Add message to chat
+    function addMessage(text, isUser = false) {
+      // Remove welcome message if exists
+      const welcome = chatMessages.querySelector('.welcome-message');
+      if (welcome) {
+        welcome.remove();
+      }
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+      
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      
+      messageDiv.innerHTML = `
+        <div class="message-bubble">
+          ${text}
+          <div class="message-time">${time}</div>
+        </div>
+      `;
+      
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Show typing indicator
+    function showTyping() {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message bot';
+      typingDiv.id = 'typingIndicator';
+      typingDiv.innerHTML = `
+        <div class="typing-indicator show">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      `;
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Remove typing indicator
+    function hideTyping() {
+      const typing = document.getElementById('typingIndicator');
+      if (typing) {
+        typing.remove();
+      }
+    }
+
+    // Handle form submission
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addMessage(message, true);
+      messageInput.value = '';
+      
+      // Disable input
+      sendBtn.disabled = true;
+      messageInput.disabled = true;
+      
+      // Show typing
+      showTyping();
+
+      try {
+        const response = await fetch('/student_chatbot/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+        
+        // Simulate typing delay
+        setTimeout(() => {
+          hideTyping();
+          
+          if (data.success) {
+            addMessage(data.response, false);
+          } else {
+            addMessage('Sorry, I encountered an error. Please try again.', false);
+          }
+          
+          // Re-enable input
+          sendBtn.disabled = false;
+          messageInput.disabled = false;
+          messageInput.focus();
+        }, 800);
+
+      } catch (error) {
+        hideTyping();
+        addMessage('Sorry, I encountered an error. Please try again.', false);
+        sendBtn.disabled = false;
+        messageInput.disabled = false;
+      }
+    });
+
+    // Handle quick actions
+    async function quickAction(action) {
+      // Add user message
+      const actionTexts = {
+        'mess_timing': 'What are the mess timings?',
+        'fee_status': 'Show my fee status',
+        'submit_complaint': 'How do I submit a complaint?',
+        'room_info': 'Show my room information',
+        'contact_admin': 'How do I contact admin?'
+      };
+      
+      addMessage(actionTexts[action], true);
+      
+      // Show typing
+      showTyping();
+
+      try {
+        const response = await fetch('/student_chatbot/quick_actions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action })
+        });
+
+        const data = await response.json();
+        
+        setTimeout(() => {
+          hideTyping();
+          
+          if (data.success) {
+            addMessage(data.response, false);
+            showSmartSuggestions(action);
+          } else {
+            addMessage('Sorry, I encountered an error. Please try again.', false);
+          }
+        }, 800);
+
+      } catch (error) {
+        hideTyping();
+        addMessage('Sorry, I encountered an error. Please try again.', false);
+      }
+    }
+
+    // Handle direct questions
+    async function askQuestion(question) {
+      messageInput.value = question;
+      chatForm.dispatchEvent(new Event('submit'));
+    }
+
+    // Show smart suggestions based on context
+    function showSmartSuggestions(context) {
+      const suggestions = {
+        'mess_timing': [
+          'Check today\'s menu',
+          'Set meal preferences',
+          'Report mess feedback'
+        ],
+        'fee_status': [
+          'Download fee receipt',
+          'Set payment reminders',
+          'View payment history'
+        ],
+        'submit_complaint': [
+          'Track complaint status',
+          'Upload supporting photos',
+          'Contact maintenance directly'
+        ],
+        'room_info': [
+          'Report room maintenance',
+          'Contact roommate',
+          'Request room change'
+        ]
+      };
+
+      const contextSuggestions = suggestions[context];
+      if (contextSuggestions) {
+        const suggestionsList = document.getElementById('suggestionsList');
+        suggestionsList.innerHTML = contextSuggestions.map(s => 
+          `<button class="suggestion-btn" onclick="askQuestion('${s}')">${s}</button>`
+        ).join('');
+        
+        document.getElementById('smartSuggestions').style.display = 'block';
+        
+        // Hide after 10 seconds
+        setTimeout(() => {
+          document.getElementById('smartSuggestions').style.display = 'none';
+        }, 10000);
+      }
+    }
+
+    // Focus input on load
+    messageInput.focus();
+  </script>
+</body>
+</html>

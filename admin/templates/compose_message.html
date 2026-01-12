@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compose Message</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <style>
+    .compose-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .compose-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    .compose-header h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    .compose-form {
+      padding: 30px;
+    }
+    .form-group {
+      margin-bottom: 25px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+      font-size: 1.1em;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    .recipient-info {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #007bff;
+    }
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(40,167,69,0.3);
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #545b62;
+    }
+    .broadcast-warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .character-count {
+      text-align: right;
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}">💰 Fees</a>
+        <a href="{{url_for('message.inbox')}}" class="active">💬 Messages</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Compose Message</h1>
+        <p>Send a message to a student or broadcast to all</p>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% set category, message = messages[-1] %}
+          <div class="form-message {{category}}">{{message}}</div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="compose-container">
+        <div class="compose-header">
+          <h1>✉️ Compose New Message</h1>
+          <p>Send a message to students</p>
+        </div>
+
+        <form method="POST" class="compose-form">
+          <div class="form-group">
+            <label for="receiver_id">📤 Send To</label>
+            <select id="receiver_id" name="receiver_id" required onchange="updateRecipientInfo()">
+              <option value="">--Select Recipient--</option>
+              <option value="all">📢 All Students (Broadcast Message)</option>
+              {% for student in students %}
+              <option value="{{student[0]}}" data-name="{{student[1]}}" data-room="{{student[2]}}" data-type="{{student[3]}}">
+                {{student[1]}} (ID: {{student[0]}}, Room: {{student[2]}})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div id="recipient-info" class="recipient-info" style="display: none;">
+            <strong>📋 Recipient Details:</strong>
+            <div id="recipient-details"></div>
+          </div>
+
+          <div id="broadcast-warning" class="broadcast-warning" style="display: none;">
+            <strong>⚠️ Broadcast Message</strong><br>
+            This message will be sent to all {{students|length}} students in the hostel.
+          </div>
+
+          <div class="form-group">
+            <label for="subject">📝 Subject</label>
+            <input type="text" id="subject" name="subject" required 
+                   placeholder="Enter a clear and descriptive subject"
+                   maxlength="100">
+            <div class="character-count">
+              <span id="subject-count">0</span>/100 characters
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="message">💬 Message</label>
+            <textarea id="message" name="message" rows="8" required 
+                      placeholder="Type your message here... Be clear and professional."
+                      maxlength="1000"></textarea>
+            <div class="character-count">
+              <span id="message-count">0</span>/1000 characters
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="btn btn-primary">📨 Send Message</button>
+            <a href="{{url_for('message.inbox')}}" class="btn btn-secondary">❌ Cancel</a>
+          </div>
+        </form>
+      </div>
+
+      <script>
+        function updateRecipientInfo() {
+          const select = document.getElementById('receiver_id');
+          const recipientInfo = document.getElementById('recipient-info');
+          const recipientDetails = document.getElementById('recipient-details');
+          const broadcastWarning = document.getElementById('broadcast-warning');
+          
+          if (select.value === 'all') {
+            recipientInfo.style.display = 'none';
+            broadcastWarning.style.display = 'block';
+          } else if (select.value) {
+            const option = select.options[select.selectedIndex];
+            const name = option.getAttribute('data-name');
+            const room = option.getAttribute('data-room');
+            const type = option.getAttribute('data-type');
+            
+            recipientDetails.innerHTML = `
+              <div style="margin-top: 10px;">
+                <div><strong>Name:</strong> ${name}</div>
+                <div><strong>Student ID:</strong> ${select.value}</div>
+                <div><strong>Room:</strong> ${room}</div>
+                <div><strong>Type:</strong> ${type || 'Student'}</div>
+              </div>
+            `;
+            recipientInfo.style.display = 'block';
+            broadcastWarning.style.display = 'none';
+          } else {
+            recipientInfo.style.display = 'none';
+            broadcastWarning.style.display = 'none';
+          }
+        }
+
+        // Character counters
+        document.getElementById('subject').addEventListener('input', function() {
+          document.getElementById('subject-count').textContent = this.value.length;
+        });
+
+        document.getElementById('message').addEventListener('input', function() {
+          document.getElementById('message-count').textContent = this.value.length;
+        });
+
+        // Pre-select recipient if passed in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const receiverId = urlParams.get('receiver_id');
+        if (receiverId) {
+          document.getElementById('receiver_id').value = receiverId;
+          updateRecipientInfo();
+        }
+      </script>
+    </main>
+  </div></body>
+</html>

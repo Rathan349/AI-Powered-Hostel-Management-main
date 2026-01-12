@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visitor Invitation</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .visitor-header {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .invite-form-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #1d3557;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 0.75rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,123,255,0.4);
+    }
+
+    .visitor-history {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .history-item {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #007bff;
+      transition: all 0.3s ease;
+    }
+
+    .history-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .history-title {
+      font-weight: 600;
+      color: #1d3557;
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-active {
+      background: #d1edff;
+      color: #0c5460;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .history-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .qr-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .qr-modal.show {
+      display: flex;
+    }
+
+    .qr-content {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .qr-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .qr-display {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .qr-code-img {
+      max-width: 250px;
+      width: 100%;
+      border: 3px solid #007bff;
+      border-radius: 15px;
+      padding: 1rem;
+      background: white;
+      margin-bottom: 1rem;
+    }
+
+    .visitor-pass-preview {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+    }
+
+    .quick-invite {
+      background: #e3f2fd;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid #007bff;
+    }
+
+    .quick-invite-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .quick-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .quick-btn:hover {
+      background: #0056b3;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .history-details {
+        grid-template-columns: 1fr;
+      }
+      
+      .quick-invite-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>{{student_data.name if student_data else 'Student'}}</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_qr.my_documents')}}">📱 Digital Documents</a>
+        <a href="{{url_for('t_qr.digital_id')}}">🆔 Digital ID</a>
+        <a href="{{url_for('t_qr.leave_request')}}">✈️ Leave Request</a>
+        <a href="{{url_for('t_qr.visitor_invite')}}" class="active">👥 Visitor Invite</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container">
+        <!-- Header -->
+        <div class="visitor-header">
+          <h1 class="mb-3">👥 Visitor Invitation System</h1>
+          <p class="mb-0">Invite guests with secure QR codes for easy hostel entry</p>
+        </div>
+
+        <!-- Quick Invite Options -->
+        <div class="quick-invite">
+          <h4 class="mb-3">⚡ Quick Invite Options</h4>
+          <p class="mb-3">Use these preset options for common visitor types:</p>
+          <div class="quick-invite-grid">
+            <button class="quick-btn" onclick="quickInvite('family')">
+              <i class="fas fa-users"></i> Family Visit
+            </button>
+            <button class="quick-btn" onclick="quickInvite('friend')">
+              <i class="fas fa-user-friends"></i> Friend Visit
+            </button>
+            <button class="quick-btn" onclick="quickInvite('delivery')">
+              <i class="fas fa-box"></i> Delivery Person
+            </button>
+            <button class="quick-btn" onclick="quickInvite('maintenance')">
+              <i class="fas fa-tools"></i> Maintenance
+            </button>
+          </div>
+        </div>
+
+        <!-- Visitor Invitation Form -->
+        <div class="invite-form-card">
+          <h3 class="mb-4">📝 Create Visitor Invitation</h3>
+          
+          <form id="visitorInviteForm">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">👤 Visitor Name</label>
+                  <input type="text" class="form-control" id="visitorName" placeholder="Full name of visitor" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">📞 Phone Number</label>
+                  <input type="tel" class="form-control" id="visitorPhone" placeholder="Visitor's contact number" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">📅 Visit Date</label>
+                  <input type="date" class="form-control" id="visitDate" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">⏰ Entry Time</label>
+                  <input type="time" class="form-control" id="entryTime" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">🎯 Purpose of Visit</label>
+                  <select class="form-control" id="visitPurpose" required>
+                    <option value="">Select Purpose</option>
+                    <option value="Family Visit">Family Visit</option>
+                    <option value="Friend Visit">Friend Visit</option>
+                    <option value="Academic">Academic</option>
+                    <option value="Delivery">Delivery</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Emergency">Emergency</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">⏳ Valid Until</label>
+                  <input type="datetime-local" class="form-control" id="validUntil" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">📝 Additional Notes (Optional)</label>
+              <textarea class="form-control" id="additionalNotes" rows="3" placeholder="Any special instructions or notes..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <i class="fas fa-user-plus"></i>
+              Create Visitor Invitation
+            </button>
+          </form>
+        </div>
+
+        <!-- Visitor History -->
+        <div class="visitor-history">
+          <h3 class="mb-4">📋 My Visitor Invitations</h3>
+          
+          {% if visitor_history %}
+            {% for visitor in visitor_history %}
+            <div class="history-item">
+              <div class="history-header">
+                <div class="history-title">
+                  {% if visitor.visitor_id %}
+                    {{visitor.visitor_name}} - ID: {{visitor.visitor_id}}
+                  {% else %}
+                    {{visitor.visitor_name}} - Request #{{visitor.request_id}}
+                  {% endif %}
+                </div>
+                <span class="status-badge status-{{visitor.status.lower().replace(' ', '-')}}">{{visitor.status}}</span>
+              </div>
+              
+              <div class="history-details">
+                <div class="detail-item">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>{{visitor.visit_date}} at {{visitor.entry_time}}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-phone"></i>
+                  <span>{{visitor.visitor_phone}}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-tag"></i>
+                  <span>{{visitor.purpose}}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-clock"></i>
+                  <span>Submitted: <span class="format-date">{{visitor.submitted_at}}</span></span>
+                </div>
+                {% if visitor.approved_by %}
+                <div class="detail-item">
+                  <i class="fas fa-user-check"></i>
+                  <span>Approved by: {{visitor.approved_by}}</span>
+                </div>
+                {% endif %}
+                {% if visitor.approved_at %}
+                <div class="detail-item">
+                  <i class="fas fa-calendar-check"></i>
+                  <span>Approved: <span class="format-date">{{visitor.approved_at}}</span></span>
+                </div>
+                {% endif %}
+                {% if visitor.rejection_reason %}
+                <div class="detail-item">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span>Reason: {{visitor.rejection_reason}}</span>
+                </div>
+                {% endif %}
+              </div>
+              
+              {% if visitor.status == 'Approved' and visitor.qr_code %}
+              <div class="mt-3">
+                <button class="btn btn-success btn-sm" onclick="showMyVisitorQR('{{visitor.qr_code}}', '{{visitor.visitor_id}}', '{{visitor.visitor_name}}', {{visitor|tojson}})">
+                  <i class="fas fa-qrcode"></i> View Visitor Pass
+                </button>
+              </div>
+              {% elif visitor.status == 'Pending' %}
+              <div class="mt-3">
+                <small class="text-muted">
+                  <i class="fas fa-hourglass-half"></i> 
+                  Waiting for admin approval. Your visitor will receive the QR code once approved.
+                </small>
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-5">
+              <i class="fas fa-user-friends" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+              <h4>No Visitor Invitations Yet</h4>
+              <p class="text-muted">Create your first visitor invitation using the form above.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- QR Modal -->
+        <div class="qr-modal" id="qrModal">
+          <div class="qr-content">
+            <button class="qr-close" onclick="closeQRModal()">
+              <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="qr-display">
+              <h3 class="text-center mb-3">👥 Visitor Invitation Created</h3>
+              <img id="qrCodeImage" class="qr-code-img" src="" alt="QR Code">
+            </div>
+
+            <div class="visitor-pass-preview" id="visitorPassPreview">
+              <div class="text-center mb-3">
+                <div style="font-size: 1.2rem; font-weight: bold;">VISITOR ENTRY PASS</div>
+                <div style="opacity: 0.8; font-size: 0.9rem;">AI Powered Hostel Management</div>
+              </div>
+              <div id="passDetails">
+                <!-- Details will be populated by JavaScript -->
+              </div>
+            </div>
+
+            <div class="text-center">
+              <button class="btn btn-primary me-2" onclick="downloadPass()">
+                <i class="fas fa-download"></i>
+                Download Pass
+              </button>
+              <button class="btn btn-success me-2" onclick="sharePass()">
+                <i class="fas fa-share"></i>
+                Share Pass
+              </button>
+              <button class="btn btn-info" onclick="sendToVisitor()">
+                <i class="fas fa-paper-plane"></i>
+                Send to Visitor
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentVisitorData = null;
+
+    // Set minimum date to today
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('visitDate').min = today;
+      document.getElementById('visitDate').value = today;
+      
+      // Set default entry time to current time + 1 hour
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      document.getElementById('entryTime').value = now.toTimeString().slice(0, 5);
+      
+      // Set default valid until to entry time + 8 hours
+      updateValidUntil();
+    });
+
+    function updateValidUntil() {
+      const visitDate = document.getElementById('visitDate').value;
+      const entryTime = document.getElementById('entryTime').value;
+      
+      if (visitDate && entryTime) {
+        const entryDateTime = new Date(`${visitDate}T${entryTime}`);
+        entryDateTime.setHours(entryDateTime.getHours() + 8); // Valid for 8 hours
+        
+        const validUntilString = entryDateTime.toISOString().slice(0, 16);
+        document.getElementById('validUntil').value = validUntilString;
+      }
+    }
+
+    // Update valid until when date or time changes
+    document.getElementById('visitDate').addEventListener('change', updateValidUntil);
+    document.getElementById('entryTime').addEventListener('change', updateValidUntil);
+
+    function quickInvite(type) {
+      const purposeMap = {
+        'family': 'Family Visit',
+        'friend': 'Friend Visit',
+        'delivery': 'Delivery',
+        'maintenance': 'Maintenance'
+      };
+      
+      document.getElementById('visitPurpose').value = purposeMap[type];
+      
+      // Scroll to form
+      document.getElementById('visitorInviteForm').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('visitorName').focus();
+    }
+
+    document.getElementById('visitorInviteForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('.submit-btn');
+      const originalText = submitBtn.innerHTML;
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Invitation...';
+
+      try {
+        const formData = {
+          name: document.getElementById('visitorName').value,
+          phone: document.getElementById('visitorPhone').value,
+          visit_date: document.getElementById('visitDate').value,
+          entry_time: document.getElementById('entryTime').value,
+          purpose: document.getElementById('visitPurpose').value,
+          valid_until: document.getElementById('validUntil').value,
+          additional_notes: document.getElementById('additionalNotes').value
+        };
+
+        const response = await fetch('/student_qr/invite_visitor', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Reset form
+          document.getElementById('visitorInviteForm').reset();
+          
+          // Reset default values
+          const today = new Date().toISOString().split('T')[0];
+          document.getElementById('visitDate').value = today;
+          updateValidUntil();
+          
+          // Show success message
+          alert(data.message || 'Visitor invitation submitted successfully! Please wait for admin approval.');
+          
+          // Refresh page to show new request
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error creating visitor invitation: ' + error.message);
+      } finally {
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
+
+    // Show approved visitor QR code
+    function showMyVisitorQR(qrCode, visitorId, visitorName, visitorData) {
+      const modal = document.getElementById('qrModal');
+      const qrImage = document.getElementById('qrCodeImage');
+      const passDetails = document.getElementById('passDetails');
+
+      currentVisitorData = {
+        qr_code: qrCode,
+        visitor_data: visitorData
+      };
+
+      // Set QR code image
+      qrImage.src = qrCode;
+
+      // Set pass details
+      passDetails.innerHTML = `
+        <div style="display: grid; gap: 0.5rem;">
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+            <span>Visitor ID:</span>
+            <span style="font-weight: bold;">${visitorId}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+            <span>Name:</span>
+            <span style="font-weight: bold;">${visitorName}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+            <span>Phone:</span>
+            <span style="font-weight: bold;">${visitorData.visitor_phone}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+            <span>Purpose:</span>
+            <span style="font-weight: bold;">${visitorData.purpose}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+            <span>Visit Date:</span>
+            <span style="font-weight: bold;">${visitorData.visit_date} at ${visitorData.entry_time}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;">
+            <span>Valid Until:</span>
+            <span style="font-weight: bold;">${new Date(visitorData.valid_until).toLocaleString()}</span>
+          </div>
+        </div>
+      `;
+
+      modal.classList.add('show');
+    }
+
+    function closeQRModal() {
+      document.getElementById('qrModal').classList.remove('show');
+    }
+
+    function downloadPass() {
+      if (!currentVisitorData) return;
+
+      const link = document.createElement('a');
+      link.download = `visitor_pass_${currentVisitorData.visitor_data.visitor_id}.png`;
+      link.href = currentVisitorData.qr_code;
+      link.click();
+    }
+
+    function sharePass() {
+      if (!currentVisitorData) return;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Visitor Entry Pass',
+          text: `Entry pass for ${currentVisitorData.visitor_data.name}`,
+          url: window.location.href
+        });
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert('Link copied to clipboard!');
+        });
+      }
+    }
+
+    function sendToVisitor() {
+      if (!currentVisitorData) return;
+      
+      const visitorPhone = currentVisitorData.visitor_data.phone;
+      const message = `Hi! You've been invited to visit the hostel. Here's your entry pass: ${window.location.href}`;
+      
+      // Try to open WhatsApp
+      const whatsappUrl = `https://wa.me/${visitorPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('qrModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeQRModal();
+      }
+    });
+
+    // Format dates on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const dateElements = document.querySelectorAll('.format-date');
+      dateElements.forEach(element => {
+        const dateStr = element.textContent;
+        if (dateStr) {
+          try {
+            const date = new Date(dateStr);
+            element.textContent = date.toLocaleString();
+          } catch (e) {
+            // Keep original if parsing fails
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

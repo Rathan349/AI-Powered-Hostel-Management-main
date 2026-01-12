@@ -1,0 +1,135 @@
+<!-- File: add_room.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add New Room</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    .form-card {
+      max-width: 50%;
+      margin: auto;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+      background-color: #f9f9f9;
+    }
+
+    .form-card label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    .form-card input,
+    .form-card select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-card input:focus,
+    .form-card select:focus {
+      border-color: #457b9d;
+      box-shadow: 0 0 0 2px rgba(69, 123, 157, 0.2);
+      outline: none;
+    }
+
+    .form-card button[type="submit"] {
+      margin-top: 1.5rem;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #457b9d;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-card button[type="submit"]:hover {
+      background-color: #2a9d8f;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}" class="active">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>{{ '✏️ Edit Room' if mode == 'edit' else '➕ Add New Room' }}</h1>
+        <p>{{ 'Update the room details below.' if mode == 'edit' else 'Enter the room details below to add a new room.'
+          }}</p>
+      </header>
+
+      <br>
+
+      <form method="POST" class="form-card"
+        action="{{url_for('room.update_room', doc_id=room_id) if mode == 'edit' else url_for('room.adding_room')}}">
+        {% with messages = get_flashed_messages(with_categories=true)%}
+        {% if messages%}
+        {% set category, message = messages[-1] %}
+        <div class="form-message {{category}}" id="form-message">{{message}}</div>
+        {% endif %}
+        {%endwith%}
+
+        <label for="roomNumber">Room Number</label>
+        <input type="text" id="roomNumber" name="roomNumber" value="{{room_data[0] if mode == 'edit' else ''}}"
+          required>
+
+        <label for="floor">Floor</label>
+        <input type="text" id="floor" name="floor" value="{{room_data[1] if mode == 'edit' else ''}}" required>
+
+        <label for="capacity">Capacity</label>
+        <input type="number" id="capacity" name="capacity" value="{{room_data[2] if mode == 'edit' else ''}}" required>
+
+        <label for="ac">AC</label>
+        <select id="ac" name="ac" required>
+          <option value="">--Select--</option>
+          <option value="Yes" {{'selected' if mode=='edit' and room_data[3]=='Yes' else '' }}>Yes</option>
+          <option value="No" {{'selected' if mode=='edit' and room_data[3]=='No' else '' }}>No</option>
+        </select>
+
+        <label for="status">Status</label>
+        <select id="status" name="status" required>
+          <option value="">-- Select Status --</option>
+          <option value="Available" {{'selected' if mode=='edit' and room_data[4]=='Available' else '' }}>Available
+          </option>
+          <option value="Occupied" {{'selected' if mode=='edit' and room_data[4]=='Occupied' else '' }}>Occupied
+          </option>
+          <option value="Under Maintenance" {{'selected' if mode=='edit' and room_data[4]=='Under Maintenance' else ''
+            }}>Under Maintenance</option>
+        </select>
+
+        <button type="submit">{{ 'Update Room' if mode == 'edit' else 'Add Room' }}</button>
+      </form>
+
+      <footer class="footer">
+        <p>&copy; 2025 AI Powered Hostel Manager. All rights reserved.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="js/add_room.js"></script></body>
+
+</html>

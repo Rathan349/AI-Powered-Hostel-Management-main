@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Features Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <style>
+    .ai-container {
+      padding: 20px;
+    }
+    .ai-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .ai-card h3 {
+      color: #2a9d8f;
+      margin-bottom: 15px;
+    }
+    .ai-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ai-form input, .ai-form select, .ai-form textarea {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .ai-form button {
+      padding: 10px 20px;
+      background: #2a9d8f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .ai-form button:hover {
+      background: #21867a;
+    }
+    .result-box {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      display: none;
+    }
+    .result-box.show {
+      display: block;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('ai.ai_dashboard')}}" class="active">🤖 AI Features</a>
+        <a href="{{url_for('tenant.manage_tenants')}}">👥 Manage Tenants</a>
+        <a href="{{url_for('complaint.complaints')}}">📋 Complaints</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <h1>🤖 AI Features Dashboard</h1>
+      
+      <div class="ai-container">
+        <div class="grid-2">
+          <!-- Room Recommendation -->
+          <div class="ai-card">
+            <h3>🏠 Smart Room Recommendation</h3>
+            <p>Find the best room match based on student preferences</p>
+            <form class="ai-form" id="roomForm">
+              <select name="ten_type" required>
+                <option value="">Select Type</option>
+                <option value="Student">Student</option>
+                <option value="Working Professional">Working Professional</option>
+              </select>
+              <select name="ac" required>
+                <option value="">AC Preference</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+              <input type="number" name="sleeptime" placeholder="Sleep Time (e.g., 22 for 10 PM)" required min="0" max="23">
+              <select name="smoking" required>
+                <option value="">Smoking Preference</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+              <button type="submit">Find Rooms</button>
+            </form>
+            <div class="result-box" id="roomResult"></div>
+          </div>
+
+          <!-- Complaint Priority Prediction -->
+          <div class="ai-card">
+            <h3>⚠️ Complaint Priority Prediction</h3>
+            <p>Predict complaint priority using AI</p>
+            <form class="ai-form" id="priorityForm">
+              <select name="complaint_type" required>
+                <option value="">Select Type</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Cleanliness">Cleanliness</option>
+                <option value="Noise">Noise</option>
+                <option value="Security">Security</option>
+                <option value="Other">Other</option>
+              </select>
+              <textarea name="complaint_text" placeholder="Enter complaint description..." rows="4" required></textarea>
+              <button type="submit">Predict Priority</button>
+            </form>
+            <div class="result-box" id="priorityResult"></div>
+          </div>
+
+          <!-- Payment Risk Analysis -->
+          <div class="ai-card">
+            <h3>💰 Payment Risk Analysis</h3>
+            <p>Analyze payment risk for a student</p>
+            <form class="ai-form" id="riskForm">
+              <input type="number" name="student_id" placeholder="Student ID" required>
+              <button type="submit">Analyze Risk</button>
+            </form>
+            <div class="result-box" id="riskResult"></div>
+          </div>
+
+          <!-- Mess Attendance Forecast -->
+          <div class="ai-card">
+            <h3>🍽️ Mess Attendance Forecast</h3>
+            <p>Forecast tomorrow's mess attendance</p>
+            <button class="ai-form" onclick="forecastAttendance()">Generate Forecast</button>
+            <div class="result-box" id="forecastResult"></div>
+          </div>
+        </div>
+
+        <!-- Roommate Compatibility -->
+        <div class="ai-card">
+          <h3>👥 Roommate Compatibility Analysis</h3>
+          <p>Find compatible roommates for a student</p>
+          <form class="ai-form" id="roommateForm" style="max-width: 400px;">
+            <input type="number" name="student_id" placeholder="Student ID" required>
+            <button type="submit">Find Compatible Roommates</button>
+          </form>
+          <div class="result-box" id="roommateResult"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Room Recommendation
+    document.getElementById('roomForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      const response = await fetch('/ai/predictRoom', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      const resultBox = document.getElementById('roomResult');
+      
+      if (result.success) {
+        let html = '<h4>Top Room Recommendations:</h4>';
+        result.recommendations.forEach((room, index) => {
+          html += `
+            <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
+              <strong>#${index + 1}: Room ${room.room_no}</strong> (Score: ${room.score})<br>
+              Floor: ${room.floor} | Capacity: ${room.capacity} | AC: ${room.ac}<br>
+              Current Occupants: ${room.current_occupants}
+            </div>
+          `;
+        });
+        resultBox.innerHTML = html;
+      } else {
+        resultBox.innerHTML = `<p style="color: red;">${result.message}</p>`;
+      }
+      resultBox.classList.add('show');
+    });
+
+    // Complaint Priority Prediction
+    document.getElementById('priorityForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      const response = await fetch('/ai/predictComplaintPriority', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      const resultBox = document.getElementById('priorityResult');
+      
+      if (result.success) {
+        const color = result.priority === 'High' ? 'red' : result.priority === 'Medium' ? 'orange' : 'green';
+        resultBox.innerHTML = `
+          <h4>Predicted Priority: <span style="color: ${color};">${result.priority}</span></h4>
+          <p>${result.message}</p>
+        `;
+      } else {
+        resultBox.innerHTML = `<p style="color: red;">${result.message}</p>`;
+      }
+      resultBox.classList.add('show');
+    });
+
+    // Payment Risk Analysis
+    document.getElementById('riskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      const response = await fetch('/ai/analyzePaymentRisk', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      const resultBox = document.getElementById('riskResult');
+      
+      if (result.success) {
+        const color = result.risk_level === 'High' ? 'red' : result.risk_level === 'Medium' ? 'orange' : 'green';
+        resultBox.innerHTML = `
+          <h4>Risk Level: <span style="color: ${color};">${result.risk_level}</span></h4>
+          <p>Risk Score: ${result.risk_score}</p>
+          <p>Total Fees: ${result.total_fees} | Pending: ${result.pending_fees} | Partial: ${result.partial_fees} | Paid: ${result.paid_fees}</p>
+        `;
+      } else {
+        resultBox.innerHTML = `<p style="color: red;">${result.message}</p>`;
+      }
+      resultBox.classList.add('show');
+    });
+
+    // Mess Attendance Forecast
+    async function forecastAttendance() {
+      const response = await fetch('/ai/forecastMessAttendance', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+      });
+      
+      const result = await response.json();
+      const resultBox = document.getElementById('forecastResult');
+      
+      if (result.success) {
+        resultBox.innerHTML = `
+          <h4>Tomorrow's Forecast: ${result.forecast} students</h4>
+          <p>7-Day Average: ${result.average_last_7_days}</p>
+          <p>Historical Data (Last 7 Days): ${result.historical_data.join(', ')}</p>
+        `;
+      } else {
+        resultBox.innerHTML = `<p style="color: red;">${result.message}</p>`;
+      }
+      resultBox.classList.add('show');
+    }
+
+    // Roommate Compatibility
+    document.getElementById('roommateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      
+      const response = await fetch('/ai/suggestRoommate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      const resultBox = document.getElementById('roommateResult');
+      
+      if (result.success) {
+        if (result.roommates.length === 0) {
+          resultBox.innerHTML = '<p>No roommates found for this student.</p>';
+        } else {
+          let html = '<h4>Roommate Compatibility:</h4>';
+          result.roommates.forEach((roommate) => {
+            html += `
+              <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
+                <strong>${roommate.roommate_name}</strong> (ID: ${roommate.roommate_id})<br>
+                Compatibility Score: ${roommate.compatibility_score}/90<br>
+                Reasons: ${roommate.reasons.join(', ') || 'No specific matches'}
+              </div>
+            `;
+          });
+          resultBox.innerHTML = html;
+        }
+      } else {
+        resultBox.innerHTML = `<p style="color: red;">${result.message}</p>`;
+      }
+      resultBox.classList.add('show');
+    });
+  </script></body>
+</html>

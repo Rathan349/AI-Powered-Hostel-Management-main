@@ -1,0 +1,143 @@
+<!-- File: student-mess.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <title>Student Mess</title>
+
+  <style>
+  </style>
+
+  <!-- ✅ Google Fonts for consistent typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- ✅ Bootstrap CSS for tables, spacing, and layout utilities -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- ✅ Custom student CSS -->
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+
+  <!-- ✅ Chart.js for rendering interactive visual data -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>{{Tenant_Name}}</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_dashboard.profile_page')}}">My Profile</a>
+        <a href="{{url_for('t_dashboard.room_page')}}">Room Info</a>
+        <a href="{{url_for('t_dashboard.mess_page')}}" class="active">Mess</a>
+        <a href="{{url_for('t_dashboard.complaint_page')}}">Complaints</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <h1 class="mb-4">🍽️ Weekly Mess Menu</h1>
+
+      <!-- ✅ Weekly mess menu table with Bootstrap styling -->
+      <table class="table table-bordered table-hover table-striped">
+        <thead class="table-success">
+          <tr>
+            <th>Day</th>
+            <th>Breakfast</th>
+            <th>Lunch</th>
+            <th>Dinner</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for day, mess in data.items() %}
+          <tr>
+            <td>{{day}}</td>
+            <td>{{mess["breakfast"]}}</td>
+            <td>{{mess["lunch"]}}</td>
+            <td>{{mess["dinner"]}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- ✅ Mess attendance confirmation form -->
+      <form action="{{url_for('t_mess.save_attendance')}}" method="post">
+        <div class="mt-4 p-3 bg-light rounded shadow-sm">
+          {% with messages = get_flashed_messages(with_categories=true)%}
+          {% if messages%}
+          {% set category, message = messages[-1] %}
+          <div class="form-message {{category}}" id="form-message">{{message}}</div>
+          {% endif %}
+          {%endwith%}
+          <h4 class="mb-3">🍽️ Mark Your Attendance for Today</h4>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="attendance" value="breakfast" id="breakfastCheck">
+            <label class="form-check-label" for="breakfastCheck">Breakfast</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="attendance" value="lunch" id="lunchCheck">
+            <label class="form-check-label" for="lunchCheck">Lunch</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="attendance" value="dinner" id="dinnerCheck">
+            <label class="form-check-label" for="dinnerCheck">Dinner</label>
+          </div>
+
+          <button type="submit" class="btn btn-success mt-3">✅ Confirm Attendance</button>
+      </form>
+
+
+      <!-- ✅ Attendance Chart Visual -->
+      <div class="mt-5 p-4 bg-light rounded shadow">
+        <h3 class="mb-3">📊 Weekly Mess Attendance Trend</h3>
+        <canvas id="attendanceChart" height="100"></canvas>
+      </div>
+    </main>
+  </div>
+
+  <!-- ✅ JS Logic for attendance + Chart rendering -->
+  <script>
+    function confirmAttendance() {
+      alert('✅ Your mess attendance has been confirmed.');
+    }
+
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    const attendanceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        datasets: [{
+          label: 'Number of Students',
+          data: [90, 85, 88, 92, 100],
+          backgroundColor: 'rgba(42, 157, 143, 0.2)',
+          borderColor: '#2A9D8F',
+          borderWidth: 3,
+          pointBackgroundColor: '#1D3557',
+          tension: 0.3
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 10
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom'
+          }
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

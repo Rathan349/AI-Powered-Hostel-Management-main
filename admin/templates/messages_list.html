@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <style>
+    .chat-list {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+    .chat-item {
+      background: white;
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border-left: 4px solid #2a9d8f;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-item:hover {
+      background: #f8f9fa;
+      transform: translateX(5px);
+    }
+    .chat-item.unread {
+      background: #e3f2fd;
+      border-left-color: #dc3545;
+    }
+    .chat-info {
+      flex: 1;
+    }
+    .student-name {
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .last-message {
+      color: #666;
+      font-size: 0.9em;
+      margin-bottom: 3px;
+    }
+    .message-time {
+      color: #999;
+      font-size: 0.85em;
+    }
+    .unread-badge {
+      background: #dc3545;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+    .compose-btn {
+      background-color: #2a9d8f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}">💰 Fees</a>
+        <a href="{{url_for('message.inbox')}}" class="active">💬 Messages</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Messages</h1>
+        <p>Chat with students</p>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% set category, message = messages[-1] %}
+          <div class="form-message {{category}}">{{message}}</div>
+        {% endif %}
+      {% endwith %}
+
+      <div>
+        <a href="{{url_for('message.compose')}}" class="compose-btn">✉️ New Message</a>
+        {% if total_unread > 0 %}
+        <span style="margin-left: 20px; color: #dc3545; font-weight: bold;">
+          {{total_unread}} unread message(s)
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="chat-list">
+        {% if conversations %}
+          {% for conv in conversations %}
+          <div class="chat-item {% if conv.unread_count > 0 %}unread{% endif %}" 
+               onclick="window.location.href='{{url_for('message.conversation', student_id=conv.student_id)}}'">
+            <div class="chat-info">
+              <div class="student-name">👤 Student {{conv.student_id}}</div>
+              <div class="last-message">
+                {% if conv.last_sender == 'admin' %}You: {% endif %}
+                {{conv.last_message[:80]}}{% if conv.last_message|length > 80 %}...{% endif %}
+              </div>
+              <div class="message-time">{{conv.last_time[:16]}}</div>
+            </div>
+            {% if conv.unread_count > 0 %}
+            <div class="unread-badge">{{conv.unread_count}} new</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="text-align: center; padding: 40px; color: #666;">
+            <p>No conversations yet</p>
+            <p style="font-size: 0.9em;">Start a conversation by sending a message to a student</p>
+          </div>
+        {% endif %}
+      </div>
+    </main>
+  </div></body>
+</html>

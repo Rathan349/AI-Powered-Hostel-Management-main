@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment History</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}" class="active">💰 Fees</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Payment History</h1>
+        <p>Transaction history for Fee ID: {{fee_data.get('fee_id')}}</p>
+      </header>
+
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+        <h3>Fee Summary</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+          <div>
+            <p><strong>Student ID:</strong> {{fee_data.get('student_id')}}</p>
+            <p><strong>Fee Type:</strong> {{fee_data.get('fee_type')}}</p>
+            <p><strong>Total Amount:</strong> ₹{{fee_data.get('amount')}}</p>
+          </div>
+          <div>
+            <p><strong>Due Date:</strong> {{fee_data.get('due_date')}}</p>
+            <p><strong>Status:</strong> <span style="color: #28a745;">{{fee_data.get('status')}}</span></p>
+            <p><strong>Total Paid:</strong> ₹{{fee_data.get('paid_amount', 0)}}</p>
+          </div>
+        </div>
+      </div>
+
+      <section class="table-section">
+        <h3>Payment Transactions</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Payment ID</th>
+              <th>Amount</th>
+              <th>Payment Date</th>
+              <th>Method</th>
+              <th>Transaction ID</th>
+              <th>Notes</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if payments %}
+              {% for payment in payments %}
+              <tr>
+                <td>{{payment.get('payment_id')}}</td>
+                <td>₹{{payment.get('amount')}}</td>
+                <td>{{payment.get('payment_date')}}</td>
+                <td>{{payment.get('payment_method')}}</td>
+                <td>{{payment.get('transaction_id', 'N/A')}}</td>
+                <td>{{payment.get('notes', 'N/A')}}</td>
+                <td>{{payment.get('timestamp', 'N/A')}}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" style="text-align: center;">No payment transactions found</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </section>
+
+      <div style="margin-top: 20px;">
+        <a href="{{url_for('fee.view_fees')}}">
+          <button style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+            ← Back to Fees
+          </button>
+        </a>
+      </div>
+    </main>
+  </div></body>
+</html>

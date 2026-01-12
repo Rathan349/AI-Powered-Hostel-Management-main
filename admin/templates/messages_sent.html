@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages - Inbox</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <style>
+    .message-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .message-tabs a {
+      padding: 10px 20px;
+      text-decoration: none;
+      color: #666;
+      border-bottom: 3px solid transparent;
+    }
+    .message-tabs a.active {
+      color: #2a9d8f;
+      border-bottom-color: #2a9d8f;
+      font-weight: bold;
+    }
+    .message-row {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .message-row:hover {
+      background-color: #f8f9fa;
+    }
+    .message-row.unread {
+      background-color: #e3f2fd;
+      font-weight: bold;
+    }
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .compose-btn {
+      background-color: #2a9d8f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}">💰 Fees</a>
+        <a href="{{url_for('message.inbox')}}" class="active">💬 Messages</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Messages</h1>
+        <p>Communicate with students</p>
+      </header>
+
+      <div style="margin-bottom: 20px;">
+        <a href="{{url_for('message.compose')}}" class="compose-btn">✉️ Compose Message</a>
+      </div>
+
+      <div class="message-tabs">
+        <a href="{{url_for('message.inbox')}}">📥 Inbox</a>
+        <a href="{{url_for('message.sent')}}" class="active">📤 Sent</a>
+      </div>
+
+      <section>
+        {% if messages %}
+          {% for msg in messages %}
+          <div class="message-row" 
+               onclick="window.location.href='{{url_for('message.view_message', message_id=msg.get('message_id'))}}'">
+            <div class="message-header">
+              <strong>To: Student {{msg.get('receiver_id')}}</strong>
+              <span style="color: #666; font-size: 0.9em;">{{msg.get('timestamp', 'N/A')[:16]}}</span>
+            </div>
+            <div style="font-weight: bold; margin-bottom: 5px;">{{msg.get('subject')}}</div>
+            <div style="color: #666; font-size: 0.9em;">
+              {{msg.get('message')[:100]}}{% if msg.get('message')|length > 100 %}...{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="text-align: center; padding: 40px; color: #666;">
+            <p>No sent messages</p>
+          </div>
+        {% endif %}
+      </section>
+    </main>
+  </div></body>
+</html>

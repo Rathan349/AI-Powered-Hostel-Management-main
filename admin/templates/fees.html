@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fee Management</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <style>
+    .export-btn {
+      background-color: #2a9d8f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    .export-btn:hover {
+      background-color: #21867a;
+    }
+    .status.Paid {
+      background-color: #28a745;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .status.Pending {
+      background-color: #ffc107;
+      color: black;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .status.Partial {
+      background-color: #17a2b8;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}" class="active">💰 Fees</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Fee Management</h1>
+        <p>Track and manage student fee payments</p>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% set category, message = messages[-1] %}
+          <div class="form-message {{category}}">{{message}}</div>
+        {% endif %}
+      {% endwith %}
+
+      <div style="margin: 20px 0;">
+        <a href="{{url_for('fee.add_fee')}}">
+          <button class="export-btn">➕ Add Fee Record</button>
+        </a>
+        <a href="{{url_for('fee.export_fees')}}">
+          <button class="export-btn">📥 Export to Excel</button>
+        </a>
+      </div>
+
+      <section class="table-section">
+        <table>
+          <thead>
+            <tr>
+              <th>Fee ID</th>
+              <th>Student ID</th>
+              <th>Amount</th>
+              <th>Due Date</th>
+              <th>Fee Type</th>
+              <th>Status</th>
+              <th>Paid Amount</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if data %}
+              {% for fee in data %}
+              <tr>
+                <td>{{fee.get('id', 'N/A')}}</td>
+                <td>{{fee.get('student_id', 'N/A')}}</td>
+                <td>₹{{fee.get('amount', 0)}}</td>
+                <td>{{fee.get('due_date', 'N/A')}}</td>
+                <td>{{fee.get('fee_type', 'N/A')}}</td>
+                <td><span class="status {{fee.get('status', 'pending').title()}}">{{fee.get('status', 'pending').title()}}</span></td>
+                <td>₹{{fee.get('paid_amount', 0)}}</td>
+                <td>
+                  {% if fee.get('status') != 'paid' %}
+                  <a href="{{url_for('fee.update_payment', fee_id=fee.get('id'))}}">
+                    <button class="action-btn edit" style="background: #007bff; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer; margin-right: 5px;">💳 Update Payment</button>
+                  </a>
+                  {% else %}
+                  <span style="color: #28a745; font-weight: bold;">✓ Paid</span>
+                  {% endif %}
+                  <a href="{{url_for('fee.payment_history', fee_id=fee.get('id'))}}">
+                    <button class="action-btn view" style="background: #6c757d; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer;">📋 History</button>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 20px; color: #6c757d;">No fee records found. <a href="{{url_for('fee.add_fee')}}">Add the first fee record</a></td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          {% if page > 1 %}
+            <a href="?page={{page - 1}}">Previous</a>
+          {% endif %}
+          <span>Page {{page}} of {{total_pages}}</span>
+          {% if page < total_pages %}
+            <a href="?page={{page + 1}}">Next</a>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+  </div></body>
+</html>

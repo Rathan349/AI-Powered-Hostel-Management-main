@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages - Inbox</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <style>
+    .messages-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .messages-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .messages-header h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    .unread-badge {
+      background: #dc3545;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: bold;
+    }
+    .message-actions {
+      padding: 20px;
+      background: #f8f9fa;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .compose-btn {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .compose-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(40,167,69,0.3);
+    }
+    .message-tabs {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .message-tabs a {
+      padding: 15px 25px;
+      text-decoration: none;
+      color: #666;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+    .message-tabs a.active {
+      color: #007bff;
+      border-bottom-color: #007bff;
+      background: white;
+      font-weight: bold;
+    }
+    .message-tabs a:hover {
+      background: #e9ecef;
+    }
+    .messages-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .message-row {
+      padding: 20px;
+      border-bottom: 1px solid #e9ecef;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .message-row:hover {
+      background: #f8f9fa;
+      transform: translateX(5px);
+    }
+    .message-row.unread {
+      background: linear-gradient(90deg, #e3f2fd 0%, #ffffff 100%);
+      border-left: 4px solid #2196f3;
+    }
+    .message-row.unread::before {
+      content: '●';
+      color: #2196f3;
+      font-size: 12px;
+      position: absolute;
+      left: 8px;
+      top: 22px;
+    }
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .sender-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sender-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .message-subject {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 5px;
+      color: #333;
+    }
+    .message-preview {
+      color: #666;
+      font-size: 0.95em;
+      line-height: 1.4;
+    }
+    .message-time {
+      color: #999;
+      font-size: 0.85em;
+      white-space: nowrap;
+    }
+    .message-actions-row {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+    }
+    .action-btn-small {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 0.8em;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-conversation {
+      background: linear-gradient(135deg, #17a2b8, #138496);
+      color: white;
+    }
+    .btn-reply {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+    .empty-state-icon {
+      font-size: 4em;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}">💰 Fees</a>
+        <a href="{{url_for('message.inbox')}}" class="active">💬 Messages</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="messages-container">
+        <div class="messages-header">
+          <h1>💬 Messages Center</h1>
+          {% if total_unread > 0 %}
+          <div class="unread-badge">{{total_unread}} unread</div>
+          {% endif %}
+        </div>
+
+        <div class="message-actions">
+          <a href="{{url_for('message.compose')}}" class="compose-btn">
+            ✉️ Compose Message
+          </a>
+          <a href="{{url_for('message.compose')}}?receiver_id=all" class="compose-btn" style="background: linear-gradient(135deg, #ffc107, #e0a800); color: black;">
+            📢 Broadcast to All
+          </a>
+          <div style="margin-left: auto; color: #666;">
+            Total Conversations: {{conversations|length}}
+          </div>
+        </div>
+
+        <div class="message-tabs">
+          <a href="{{url_for('message.inbox')}}" class="active">📥 Inbox ({{conversations|length}})</a>
+          <a href="{{url_for('message.sent')}}">📤 Sent</a>
+        </div>
+
+        <div class="messages-list">
+          {% if conversations %}
+            {% for conversation in conversations %}
+            <div class="message-row {% if conversation.unread_count > 0 %}unread{% endif %}">
+              <div onclick="window.location.href='{{url_for('message.conversation', student_id=conversation.student_id)}}'">
+                <div class="message-header">
+                  <div class="sender-info">
+                    <div class="sender-avatar">S</div>
+                    <div>
+                      <strong>Student ID: {{conversation.student_id}}</strong>
+                      {% if conversation.unread_count > 0 %}
+                      <span style="color: #dc3545; font-size: 0.8em; margin-left: 10px;">
+                        ({{conversation.unread_count}} new)
+                      </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="message-time">
+                    {{conversation.last_message.get('timestamp', 'N/A')[:16]}}
+                  </div>
+                </div>
+                <div class="message-subject">
+                  {{conversation.last_message.get('subject', 'No Subject')}}
+                </div>
+                <div class="message-preview">
+                  {{conversation.last_message.get('message', '')[:120]}}
+                  {% if conversation.last_message.get('message', '')|length > 120 %}...{% endif %}
+                </div>
+              </div>
+              <div class="message-actions-row">
+                <a href="{{url_for('message.conversation', student_id=conversation.student_id)}}" 
+                   class="action-btn-small btn-conversation" onclick="event.stopPropagation();">
+                  💬 View Chat
+                </a>
+                <a href="{{url_for('message.compose')}}?receiver_id={{conversation.student_id}}" 
+                   class="action-btn-small btn-reply" onclick="event.stopPropagation();">
+                  ↩️ Reply
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <h3>No Messages Yet</h3>
+              <p>When students send you messages, they'll appear here.</p>
+              <a href="{{url_for('message.compose')}}" class="compose-btn">
+                ✉️ Send First Message
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div></body>
+</html>

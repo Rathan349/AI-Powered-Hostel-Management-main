@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Attendance</title>
+  <link rel="stylesheet" href="{{ url_for('auth.static', filename='styles.css') }}">
+  <style>
+    .export-btn {
+      background-color: #2a9d8f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    .export-btn:hover {
+      background-color: #21867a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🏨 AI Powered Hostel Manager</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="{{url_for('dashboard.mainpage')}}">🏠 Dashboard</a>
+        <a href="{{url_for('dashboard.manage_tenants')}}">📝 Manage Student</a>
+        <a href="{{url_for('dashboard.manage_rooms')}}">🛏️ Manage Rooms</a>
+        <a href="{{url_for('dashboard.manage_mess')}}">🍽️ Manage Mess</a>
+        <a href="{{url_for('dashboard.manage_complaints')}}">🛠️ Complaints</a>
+        <a href="{{url_for('attendance.view_attendance')}}" class="active">📊 Attendance</a>
+        <a href="{{url_for('fee.view_fees')}}">💰 Fees</a>
+        <a href="{{url_for('auth.logout')}}">🚪 Logout</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <h1>Student Attendance</h1>
+        <p>Track and manage student attendance records</p>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% set category, message = messages[-1] %}
+          <div class="form-message {{category}}">{{message}}</div>
+        {% endif %}
+      {% endwith %}
+
+      <div style="margin: 20px 0; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+        <a href="{{url_for('attendance.mark_attendance')}}">
+          <button class="export-btn">➕ Mark Attendance</button>
+        </a>
+        <a href="{{url_for('attendance.smart_attendance')}}">
+          <button class="export-btn" style="background: #17a2b8;">📊 Smart Dashboard</button>
+        </a>
+        <a href="{{url_for('attendance.export_attendance')}}">
+          <button class="export-btn">📥 Export to Excel</button>
+        </a>
+        
+        <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+          <label for="date" style="font-weight: bold;">Filter by Date:</label>
+          <input type="date" id="date" name="date" value="{{date_filter}}" max="{{current_date}}" 
+                 style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+          <button type="submit" class="export-btn" style="background: #6c757d; padding: 8px 15px;">🔍 Filter</button>
+          {% if date_filter %}
+          <a href="{{url_for('attendance.view_attendance')}}">
+            <button type="button" class="export-btn" style="background: #dc3545; padding: 8px 15px;">❌ Clear</button>
+          </a>
+          {% endif %}
+        </form>
+      </div>
+
+      <section class="table-section">
+        <table>
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Student Name</th>
+              <th>Room</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if data %}
+              {% for record in data %}
+              <tr>
+                <td><strong>{{record.get('student_id', record.get('tenant_id'))}}</strong></td>
+                <td>{{record.get('student_name', 'Unknown')}}</td>
+                <td>{{record.get('room_number', 'N/A')}}</td>
+                <td>{{record.get('date')}}</td>
+                <td>
+                  <span class="status" style="
+                    padding: 5px 10px; 
+                    border-radius: 15px; 
+                    font-weight: bold; 
+                    {% if record.get('status') == 'Present' %}
+                      background: #28a745; color: white;
+                    {% elif record.get('status') == 'Absent' %}
+                      background: #dc3545; color: white;
+                    {% elif record.get('status') == 'Leave' %}
+                      background: #ffc107; color: black;
+                    {% else %}
+                      background: #6c757d; color: white;
+                    {% endif %}
+                  ">
+                    {% if record.get('status') == 'Present' %}✅ Present
+                    {% elif record.get('status') == 'Absent' %}❌ Absent
+                    {% elif record.get('status') == 'Leave' %}🏖️ Leave
+                    {% else %}❓ {{record.get('status')}}
+                    {% endif %}
+                  </span>
+                </td>
+                <td>{{record.get('time', 'N/A')}}</td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 30px; color: #6c757d;">
+                  {% if date_filter %}
+                    No attendance records found for {{date_filter}}. 
+                    <a href="{{url_for('attendance.mark_attendance', date=date_filter)}}">Mark attendance for this date</a>
+                  {% else %}
+                    No attendance records found. 
+                    <a href="{{url_for('attendance.mark_attendance')}}">Start marking attendance</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          {% if page > 1 %}
+            <a href="?page={{page - 1}}">Previous</a>
+          {% endif %}
+          <span>Page {{page}} of {{total_pages}}</span>
+          {% if page < total_pages %}
+            <a href="?page={{page + 1}}">Next</a>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+  </div></body>
+</html>

@@ -1,0 +1,133 @@
+<!-- File: student-signin.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Student Login - Hostel Manager</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: url('my_background.jpg') no-repeat center center/cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(247, 243, 243, 0.7);
+      background-blend-mode: overlay;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 30px;
+      border-radius: 12px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .login-card h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #1D1D1D;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      font-weight: 500;
+      margin: 8px 0 4px;
+      color: #1D1D1D;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #457B9D;
+      border-radius: 8px;
+      background: #FFFFFF;
+      color: #1D1D1D;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    input::placeholder {
+      color: #444444;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: #2A9D8F;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      background: #1D3557;
+    }
+
+    .small-text {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #444444;
+    }
+
+    .small-text a {
+      color: #457B9D;
+      text-decoration: none;
+    }
+
+    .small-text a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="studentLoginForm" class="login-card" method="post" action="{{url_for('t_auth.validate_signin')}}">
+    {% with messages = get_flashed_messages(with_categories=true)%}
+    {% if messages%}
+    {% set category, message = messages[-1] %}
+    <div class="form-message {{category}}" id="form-message">{{message}}</div>
+    {% endif %}
+    {%endwith%}
+    <h2>🎓 Student Login</h2>
+
+    <label for="studentId">Student ID</label>
+    <input type="text" id="tenantId" name="tenantId" placeholder="e.g. 1001" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+    <div class="forgot-password">
+      <a href="{{url_for('t_auth.forget_pass')}}">Forgot Password?</a>
+    </div>
+    <button type="submit" class="btn">Login</button>
+
+    <p class="small-text">
+      Don't have an account? <a href="{{url_for('t_auth.signup_page')}}">Register here</a><br>
+
+    </p>
+  </form>
+
+  <script>
+  
+  </script>
+</body>
+
+</html>

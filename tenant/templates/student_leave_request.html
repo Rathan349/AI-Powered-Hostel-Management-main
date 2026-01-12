@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Request</title>
+  <link rel="stylesheet" href="{{ url_for('t_auth.static', filename='student.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .leave-header {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .leave-form-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #1d3557;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 0.75rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: #ffc107;
+      box-shadow: 0 0 0 0.2rem rgba(255,193,7,.25);
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      color: #212529;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255,193,7,0.4);
+    }
+
+    .leave-history {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .history-item {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #ffc107;
+      transition: all 0.3s ease;
+    }
+
+    .history-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .history-title {
+      font-weight: 600;
+      color: #1d3557;
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-approved {
+      background: #d1edff;
+      color: #0c5460;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .history-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .qr-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .qr-modal.show {
+      display: flex;
+    }
+
+    .qr-content {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .qr-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .qr-display {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .qr-code-img {
+      max-width: 250px;
+      width: 100%;
+      border: 3px solid #ffc107;
+      border-radius: 15px;
+      padding: 1rem;
+      background: white;
+      margin-bottom: 1rem;
+    }
+
+    .leave-pass-preview {
+      background: linear-gradient(135deg, #ffc107, #e0a800);
+      color: #212529;
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .history-details {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="student-container">
+    <aside class="student-sidebar">
+      <h2>{{student_data.name if student_data else 'Student'}}</h2>
+      <nav>
+        <a href="{{url_for('t_dashboard.dashboard_page')}}">Dashboard</a>
+        <a href="{{url_for('t_qr.my_documents')}}">📱 Digital Documents</a>
+        <a href="{{url_for('t_qr.digital_id')}}">🆔 Digital ID</a>
+        <a href="{{url_for('t_qr.leave_request')}}" class="active">✈️ Leave Request</a>
+        <a href="{{url_for('t_qr.visitor_invite')}}">👥 Visitor Invite</a>
+        <a href="{{url_for('t_auth.logout')}}">Logout</a>
+      </nav>
+    </aside>
+
+    <main class="student-main">
+      <div class="container">
+        <!-- Header -->
+        <div class="leave-header">
+          <h1 class="mb-3">✈️ Digital Leave Request</h1>
+          <p class="mb-0">Submit leave requests and get instant digital passes with QR verification</p>
+        </div>
+
+        <!-- Leave Request Form -->
+        <div class="leave-form-card">
+          <h3 class="mb-4">📝 Submit New Leave Request</h3>
+          
+          <form id="leaveRequestForm">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">📅 Leave From</label>
+                  <input type="datetime-local" class="form-control" id="leaveFrom" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">📅 Leave To</label>
+                  <input type="datetime-local" class="form-control" id="leaveTo" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">🎯 Purpose</label>
+                  <select class="form-control" id="purpose" required>
+                    <option value="">Select Purpose</option>
+                    <option value="Home Visit">Home Visit</option>
+                    <option value="Medical">Medical</option>
+                    <option value="Emergency">Emergency</option>
+                    <option value="Personal Work">Personal Work</option>
+                    <option value="Family Function">Family Function</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">📍 Destination</label>
+                  <input type="text" class="form-control" id="destination" placeholder="Where are you going?" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">📞 Emergency Contact</label>
+              <input type="tel" class="form-control" id="emergencyContact" placeholder="Contact number during leave" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">📝 Additional Details (Optional)</label>
+              <textarea class="form-control" id="additionalDetails" rows="3" placeholder="Any additional information..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <i class="fas fa-paper-plane"></i>
+              Submit Leave Request
+            </button>
+          </form>
+        </div>
+
+        <!-- Leave History -->
+        <div class="leave-history">
+          <h3 class="mb-4">📋 My Leave Requests</h3>
+          
+          {% if leave_history %}
+            {% for leave in leave_history %}
+            <div class="history-item">
+              <div class="history-header">
+                <div class="history-title">
+                  {% if leave.pass_id %}
+                    Leave Pass #{{leave.pass_id}}
+                  {% else %}
+                    Request #{{leave.request_id}}
+                  {% endif %}
+                </div>
+                <span class="status-badge status-{{leave.status.lower().replace(' ', '-')}}">{{leave.status}}</span>
+              </div>
+              
+              <div class="history-details">
+                <div class="detail-item">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>{{leave.leave_from}} to {{leave.leave_to}}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>{{leave.destination}}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-tag"></i>
+                  <span>{{leave.purpose}}</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-clock"></i>
+                  <span>Submitted: <span class="format-date">{{leave.submitted_at}}</span></span>
+                </div>
+                {% if leave.approved_by %}
+                <div class="detail-item">
+                  <i class="fas fa-user-check"></i>
+                  <span>Approved by: {{leave.approved_by}}</span>
+                </div>
+                {% endif %}
+                {% if leave.approved_at %}
+                <div class="detail-item">
+                  <i class="fas fa-calendar-check"></i>
+                  <span>Approved: <span class="format-date">{{leave.approved_at}}</span></span>
+                </div>
+                {% endif %}
+                {% if leave.rejection_reason %}
+                <div class="detail-item">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span>Reason: {{leave.rejection_reason}}</span>
+                </div>
+                {% endif %}
+              </div>
+              
+              {% if leave.status == 'Approved' and leave.qr_code %}
+              <div class="mt-3">
+                <button class="btn btn-success btn-sm" onclick="showMyQR('{{leave.qr_code}}', '{{leave.pass_id}}', '{{leave.student_name}}', {{leave|tojson}})">
+                  <i class="fas fa-qrcode"></i> View My QR Pass
+                </button>
+              </div>
+              {% elif leave.status == 'Pending' %}
+              <div class="mt-3">
+                <small class="text-muted">
+                  <i class="fas fa-hourglass-half"></i> 
+                  Waiting for admin approval. You will receive your QR code once approved.
+                </small>
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-5">
+              <i class="fas fa-plane-departure" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+              <h4>No Leave Requests Yet</h4>
+              <p class="text-muted">Submit your first leave request using the form above.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- QR Modal -->
+        <div class="qr-modal" id="qrModal">
+          <div class="qr-content">
+            <button class="qr-close" onclick="closeQRModal()">
+              <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="qr-display">
+              <h3 class="text-center mb-3">✈️ Digital Leave Pass Generated</h3>
+              <img id="qrCodeImage" class="qr-code-img" src="" alt="QR Code">
+            </div>
+
+            <div class="leave-pass-preview" id="leavePassPreview">
+              <div class="text-center mb-3">
+                <div style="font-size: 1.2rem; font-weight: bold;">DIGITAL LEAVE PASS</div>
+                <div style="opacity: 0.8; font-size: 0.9rem;">AI Powered Hostel Management</div>
+              </div>
+              <div id="passDetails">
+                <!-- Details will be populated by JavaScript -->
+              </div>
+            </div>
+
+            <div class="text-center">
+              <button class="btn btn-primary me-2" onclick="downloadPass()">
+                <i class="fas fa-download"></i>
+                Download Pass
+              </button>
+              <button class="btn btn-success" onclick="sharePass()">
+                <i class="fas fa-share"></i>
+                Share Pass
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let currentLeaveData = null;
+
+    document.getElementById('leaveRequestForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('.submit-btn');
+      const originalText = submitBtn.innerHTML;
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+      try {
+        const formData = {
+          leave_from: document.getElementById('leaveFrom').value,
+          leave_to: document.getElementById('leaveTo').value,
+          purpose: document.getElementById('purpose').value,
+          destination: document.getElementById('destination').value,
+          emergency_contact: document.getElementById('emergencyContact').value,
+          additional_details: document.getElementById('additionalDetails').value
+        };
+
+        const response = await fetch('/student_qr/request_leave', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Reset form
+          document.getElementById('leaveRequestForm').reset();
+          
+          // Show success message
+          alert(data.message || 'Leave request submitted successfully! Please wait for admin approval.');
+          
+          // Refresh page to show new request
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error submitting leave request: ' + error.message);
+      } finally {
+        // Reset button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
+
+    // Show approved QR code
+    function showMyQR(qrCode, passId, studentName, leaveData) {
+      const modal = document.getElementById('qrModal');
+      const qrImage = document.getElementById('qrCodeImage');
+      const passDetails = document.getElementById('passDetails');
+
+      currentLeaveData = {
+        qr_code: qrCode,
+        leave_data: leaveData
+      };
+
+      // Set QR code image
+      qrImage.src = qrCode;
+
+      // Set pass details
+      passDetails.innerHTML = `
+        <div style="display: grid; gap: 0.5rem;">
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(0,0,0,0.2);">
+            <span>Pass ID:</span>
+            <span style="font-weight: bold;">${passId}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(0,0,0,0.2);">
+            <span>Student:</span>
+            <span style="font-weight: bold;">${studentName}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(0,0,0,0.2);">
+            <span>Room:</span>
+            <span style="font-weight: bold;">${leaveData.room}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(0,0,0,0.2);">
+            <span>Purpose:</span>
+            <span style="font-weight: bold;">${leaveData.purpose}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; border-bottom: 1px solid rgba(0,0,0,0.2);">
+            <span>Destination:</span>
+            <span style="font-weight: bold;">${leaveData.destination}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;">
+            <span>Valid:</span>
+            <span style="font-weight: bold;">${new Date(leaveData.leave_from).toLocaleDateString()} - ${new Date(leaveData.leave_to).toLocaleDateString()}</span>
+          </div>
+        </div>
+      `;
+
+      modal.classList.add('show');
+    }
+
+    function closeQRModal() {
+      document.getElementById('qrModal').classList.remove('show');
+    }
+
+    function downloadPass() {
+      if (!currentLeaveData) return;
+
+      const link = document.createElement('a');
+      link.download = `leave_pass_${currentLeaveData.leave_data.pass_id}.png`;
+      link.href = currentLeaveData.qr_code;
+      link.click();
+    }
+
+    function sharePass() {
+      if (!currentLeaveData) return;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Digital Leave Pass',
+          text: `Leave pass for ${currentLeaveData.leave_data.student_name}`,
+          url: window.location.href
+        });
+      } else {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert('Link copied to clipboard!');
+        });
+      }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('qrModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeQRModal();
+      }
+    });
+
+    // Format dates on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const dateElements = document.querySelectorAll('.format-date');
+      dateElements.forEach(element => {
+        const dateStr = element.textContent;
+        if (dateStr) {
+          try {
+            const date = new Date(dateStr);
+            element.textContent = date.toLocaleString();
+          } catch (e) {
+            // Keep original if parsing fails
+          }
+        }
+      });
+    });
+
+    // Set minimum date to today
+    document.addEventListener('DOMContentLoaded', function() {
+      const now = new Date();
+      const dateString = now.toISOString().slice(0, 16);
+      document.getElementById('leaveFrom').min = dateString;
+      document.getElementById('leaveTo').min = dateString;
+    });
+
+    // Update minimum "to" date when "from" date changes
+    document.getElementById('leaveFrom').addEventListener('change', function() {
+      document.getElementById('leaveTo').min = this.value;
+    });
+  </script>
+</body>
+</html>
