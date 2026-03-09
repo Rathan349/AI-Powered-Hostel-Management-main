@@ -1,0 +1,10 @@
+Flask
+gunicorn
+Flask-Mail
+firebase-admin
+python-dotenv
+numpy
+pandas
+scikit-learn
+qrcode
+Pillow
